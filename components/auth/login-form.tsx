@@ -33,18 +33,18 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div className="space-y-1 text-sm">
-        <label className="font-medium text-slate-700">Email Address</label>
+        <label className="font-medium text-slate-700">Matriculation Number</label>
         <div className="relative">
-          <Input placeholder="you@student.scspay.edu" type="email" {...register("email")} />
-          <Mail className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Input className="pl-11" placeholder="FT23CMP001" type="text" {...register("email")} />
+          <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         </div>
         {errors.email && <p className="text-xs text-rose-600">{errors.email.message}</p>}
       </div>
       <div className="space-y-1 text-sm">
         <label className="font-medium text-slate-700">Password</label>
         <div className="relative">
-          <Input placeholder="••••••••" type="password" {...register("password")} />
-          <Lock className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Input className="pl-11" placeholder="********" type="password" {...register("password")} />
+          <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         </div>
         {errors.password && <p className="text-xs text-rose-600">{errors.password.message}</p>}
       </div>

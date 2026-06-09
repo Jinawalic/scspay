@@ -4,58 +4,46 @@ import { LoginForm } from "@/components/auth/login-form";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-[#F8FAFC] px-4 py-10 sm:px-8 lg:px-16">
-      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-        <section className="relative overflow-hidden rounded-[2.5rem] bg-white/90 p-10 shadow-[0_35px_120px_-40px_rgba(15,23,42,0.25)] sm:p-12 lg:p-16">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(22,163,74,0.18),_transparent_40%),radial-gradient(circle_at_bottom_right,_rgba(56,189,248,0.12),_transparent_35%)]" />
-          <div className="relative flex flex-col gap-6">
-            <div className="flex items-center gap-3 rounded-3xl border border-slate-200 bg-emerald-50/80 px-4 py-2 text-sm text-emerald-700 shadow-sm">
-              <span className="font-semibold">SCSPAY</span>
-              <span className="rounded-full bg-emerald-600 px-2 py-1 text-xs text-white">Secure Student Payment Portal</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <Image src="/images/logo.svg" alt="SCSPAY logo" width={140} height={42} priority />
-            </div>
-            <div className="max-w-xl space-y-6">
-              <h1 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">Secure payments for students made simple.</h1>
-              <p className="text-lg leading-8 text-slate-600">Access tuition, hostel, acceptance and departmental payments with a clean financial dashboard built for student life.</p>
-            </div>
-            <div className="grid gap-8 sm:grid-cols-2">
-              <div className="rounded-[2rem] bg-slate-50 p-6 shadow-sm">
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Trusted</p>
-                <p className="mt-3 text-xl font-semibold text-slate-950">Modern fintech UI</p>
-              </div>
-              <div className="rounded-[2rem] bg-slate-50 p-6 shadow-sm">
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Ready</p>
-                <p className="mt-3 text-xl font-semibold text-slate-950">Future-ready payments</p>
+    <main className="min-h-screen h-screen bg-[#F8FAFC] flex items-center justify-center overflow-hidden">
+      <div className="w-full">
+        <div className="grid min-h-screen h-screen grid-cols-1 md:grid-cols-2 gap-10 items-center justify-center">
+          {/* Left: Illustration & marketing (desktop-only) */}
+          <section className="hidden md:flex w-full h-screen rounded-xl bg-white px-18 p-8 shadow-sm relative overflow-hidden">
+            <div className="relative z-10 flex w-full max-w-md flex-col items-center justify-center gap-4 text-center">
+              <Image src="/images/login-bg.png" alt="Secure shield illustration" width={2000} height={2000} />
+              <div className="space-y-4">
+                <h1 className="text-3xl font-semibold leading-tight tracking-tight text-slate-950">Secured Payment Portal for Science Communication.</h1>
+                <p className="text-sm leading-7 text-slate-500">Pay school fees, acceptance fees, hostel charges, and more with a clean, secure student payment experience.</p>
               </div>
             </div>
-            <div className="mt-8 flex justify-center sm:justify-start">
-              <Image src="/images/secure-illustration.svg" alt="Secure payment illustration" width={380} height={260} className="rounded-[2rem]" />
+          </section>
+
+          {/* Right: Login card (always visible; on mobile it becomes the main view) */}
+          <div className="mx-auto w-full max-w-xl">
+            <div className="relative overflow-hidden rounded-xl md:hidden">
+              <Image src="/images/login-bg.png" alt="Login background" fill className="object-cover" />
+              <div className="absolute inset-0 bg-slate-950/40" />
+              <section className="relative mx-auto w-full rounded-xl border border-slate-200 bg-white/95 p-6 shadow-sm sm:p-8">
+                <div className="mb-6 space-y-3 text-center sm:text-left">
+                  <div>
+                    <h2 className="text-2xl font-semibold text-slate-950">Welcome Back</h2>
+                    <p className="mt-1 text-sm text-slate-500">Enter your credentials to sign in.</p>
+                  </div>
+                </div>
+                <LoginForm />
+              </section>
             </div>
+            <section className="hidden md:block mx-auto w-full rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+              <div className="mb-6 space-y-3 text-center sm:text-left">
+                <div>
+                  <h2 className="text-2xl font-semibold text-slate-950">Welcome Back</h2>
+                  <p className="mt-1 text-sm text-slate-500">Enter your credentials to sign in.</p>
+                </div>
+              </div>
+              <LoginForm />
+            </section>
           </div>
-        </section>
-        <section className="rounded-[2.5rem] border border-slate-200 bg-white/95 p-8 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.25)] sm:p-10">
-          <div className="mb-8 space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">
-              <span>Welcome back</span>
-            </div>
-            <div>
-              <h2 className="text-3xl font-semibold text-slate-950">Login to your SCSPAY account</h2>
-              <p className="mt-2 text-sm text-slate-500">Enter your credentials to continue with secure student payments.</p>
-            </div>
-          </div>
-          <LoginForm />
-          <div className="mt-8 rounded-[2rem] bg-slate-50 p-4 text-sm text-slate-500">
-            <p className="font-medium text-slate-700">No landing page needed.</p>
-            <p className="mt-2">Jump straight into payments, receipts, and profile tools with SCSPAY.</p>
-          </div>
-          <div className="mt-6 text-center text-sm text-slate-500">
-            <Link href="/register" className="font-semibold text-emerald-700 hover:text-emerald-800">
-              Create account
-            </Link>
-          </div>
-        </section>
+        </div>
       </div>
     </main>
   );
