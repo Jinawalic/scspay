@@ -14,6 +14,7 @@ export type Transaction = {
   date: string;
   status: "Successful" | "Pending" | "Failed";
   session: string;
+  description?: string;
 };
 
 export type StudentProfile = {

@@ -1,30 +1,43 @@
-import { Card } from "@/components/ui/card";
+import { cn } from "@/src/lib/utils";
 
-export function PaymentSummary({ feeType, amount, serviceCharge, total }: { feeType: string; amount: number; serviceCharge: number; total: number }) {
+interface PaymentSummaryProps {
+  title: string;
+  subtitle?: string;
+  selectedItem: string;
+  method?: string;
+  total: number;
+  className?: string;
+}
+
+export function PaymentSummary({
+  title,
+  subtitle = "Review the payment details before submitting.",
+  selectedItem,
+  method = "Paystack",
+  total,
+  className
+}: PaymentSummaryProps) {
   return (
-    <Card className="space-y-4">
+    <div className={cn("rounded-[1.75rem] bg-[#F5F8FA] p-6 text-left", className)}>
       <div>
-        <p className="text-sm font-medium text-slate-500">Payment Summary</p>
-        <h2 className="mt-2 text-xl font-semibold text-slate-950">Review before checkout</h2>
+        <h2 className="text-base font-bold text-[#1E2E42] tracking-tight">{title}</h2>
+        <p className="text-xs font-semibold text-slate-400 mt-1 leading-normal">{subtitle}</p>
       </div>
-      <div className="space-y-3 rounded-[1.75rem] bg-slate-50 p-4">
-        <div className="flex items-center justify-between text-sm text-slate-600">
-          <span>Fee Type</span>
-          <span>{feeType}</span>
+
+      <div className="mt-5 rounded-2xl bg-white p-5 space-y-4 shadow-sm border border-slate-100/50">
+        <div className="flex items-center justify-between text-sm">
+          <span className="font-semibold text-slate-400">Selected Items</span>
+          <span className="font-bold text-[#1E2E42]">{selectedItem}</span>
         </div>
-        <div className="flex items-center justify-between text-sm text-slate-600">
-          <span>Amount</span>
-          <span>₦{amount.toLocaleString()}</span>
+        <div className="flex items-center justify-between text-sm">
+          <span className="font-semibold text-slate-400">Method</span>
+          <span className="font-bold text-[#1E2E42]">{method}</span>
         </div>
-        <div className="flex items-center justify-between text-sm text-slate-600">
-          <span>Service Charge</span>
-          <span>₦{serviceCharge.toLocaleString()}</span>
+        <div className="border-t border-slate-100 pt-4 flex items-center justify-between text-sm">
+          <span className="font-bold text-[#1E2E42]">Total</span>
+          <span className="text-xl font-extrabold text-[#135A3D]">₦{total.toLocaleString()}</span>
         </div>
       </div>
-      <div className="flex items-center justify-between border-t border-slate-200 pt-4 text-lg font-semibold text-slate-950">
-        <span>Total</span>
-        <span>₦{total.toLocaleString()}</span>
-      </div>
-    </Card>
+    </div>
   );
 }
