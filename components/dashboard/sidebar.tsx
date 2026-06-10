@@ -3,9 +3,7 @@ import Link from "next/link";
 
 const items = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Make Payment", href: "/make-payment", icon: CreditCard },
   { label: "Payment History", href: "/payment-history", icon: FileText },
-  { label: "Receipts", href: "/receipt/SCSPAY-2026-0045", icon: Receipt },
   { label: "Profile", href: "/profile", icon: ShieldCheck },
 ];
 

@@ -1,6 +1,6 @@
 export function PaymentStatus() {
   return (
-    <div className="flex items-center justify-between rounded-3xl bg-white px-6 py-4 shadow-sm">
+    <div className="flex items-center justify-between rounded-xl bg-white px-6 py-4 shadow-sm">
       {/* Payment Status Text */}
       <div>
         <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-400">

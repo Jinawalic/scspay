@@ -1,14 +1,8 @@
 "use client";
 
 import type { Transaction } from "@/src/types";
-import { Receipt, Calendar, Trash2, Download } from "lucide-react";
+import { Receipt, Calendar, Trash2, Download, CreditCard } from "lucide-react";
 import { motion } from "framer-motion";
-
-// ====================================
-// Transaction Card Component
-// ====================================
-// Renders an individual transaction card matching the second inspiration image.
-// Features layout animations, soft hover states, status badge, and action buttons.
 
 export function TransactionCard({
   transaction,
@@ -26,14 +20,14 @@ export function TransactionCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3 }}
-      className="rounded-xl border border-slate-100 bg-white p-5 transition-shadow hover:shadow-md"
+      className="rounded-xl border border-slate-100 bg-white p-3 transition-shadow hover:shadow-md"
     >
       <div className="flex items-center justify-between gap-4">
         {/* Left Section: Icon and Details */}
         <div className="flex items-start gap-4 flex-1 min-w-0">
           {/* Icon Container */}
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#EAF5F0]">
-            <Receipt className="h-6 w-6 text-[#135A3D]" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EAF5F0]">
+            <CreditCard className="h-6 w-6 text-[#135A3D]" />
           </div>
 
           {/* Details */}
@@ -56,7 +50,7 @@ export function TransactionCard({
           </p>
 
           {/* Action Button */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center">
             <button
               onClick={(e) => {
                 e.stopPropagation();

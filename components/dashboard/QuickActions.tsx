@@ -4,7 +4,7 @@ import { ShieldCheck, Shirt, History, AlertCircle } from "lucide-react";
 export function QuickActions() {
   const actions = [
     {
-      label: "SCS Dues",
+      label: "Make Payment",
       icon: ShieldCheck,
       href: "/make-payment",
       bgClass: "bg-[#EAF5F0]",
@@ -34,7 +34,7 @@ export function QuickActions() {
               className="group flex flex-col items-center justify-center rounded-xl border border-slate-100/80 bg-white p-6 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
             >
               <div
-                className={`mb-4 flex h-16 w-16 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 ${action.bgClass}`}
+                className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 ${action.bgClass}`}
               >
                 <Icon className={`h-7 w-7 ${action.iconClass}`} />
               </div>

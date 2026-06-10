@@ -6,12 +6,6 @@ import { recentTransactions } from "@/src/data/mock";
 import { TransactionCard } from "./TransactionCard";
 import { AnimatePresence } from "framer-motion";
 
-// ====================================
-// Recent Transactions Component
-// ====================================
-// Centered header, search input field with Receipt icon, and a list of vertical transaction cards.
-// Implements client-side search filtering and item deletion animation.
-
 export function RecentTransactions() {
   const [searchQuery, setSearchQuery] = useState("");
   const [transactions, setTransactions] = useState(recentTransactions);
@@ -31,7 +25,7 @@ export function RecentTransactions() {
   };
 
   const handleDownload = (receipt: string) => {
-    window.location.href = `/receipt/${receipt}`;
+    window.open(`/receipt/${receipt}?print=1`, "_blank", "noopener,noreferrer");
   };
 
   return (

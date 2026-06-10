@@ -1,14 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { CreditCard, FileText, Home, Receipt, UserCircle } from "lucide-react";
+import { FileText, Home, UserCircle } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const navItems = [
   { href: "/dashboard", label: "Home", icon: Home },
-  { href: "/make-payment", label: "Pay", icon: CreditCard },
   { href: "/payment-history", label: "History", icon: FileText },
-  { href: "/receipt/SCSPAY-2026-0045", label: "Receipt", icon: Receipt },
   { href: "/profile", label: "Profile", icon: UserCircle },
 ];
 
@@ -25,11 +23,10 @@ export function MobileBottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-1.5 transition-all ${
-                isActive
-                  ? "text-blue-600 scale-110"
-                  : "text-slate-400 hover:text-slate-600"
-              }`}
+              className={`flex flex-col items-center gap-1.5 transition-all ${isActive
+                ? "text-blue-600 scale-110"
+                : "text-slate-400 hover:text-slate-600"
+                }`}
             >
               <Icon className="h-6 w-6" />
               <span className="text-[10px] font-medium">{item.label}</span>

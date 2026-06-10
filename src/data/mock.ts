@@ -2,14 +2,14 @@ import type { PaymentCategory, Transaction, StudentProfile } from "@/src/types";
 
 export const paymentCategories: PaymentCategory[] = [
   {
-    id: "school-fees",
+    id: "Course-fees",
     name: "School Fees",
     description: "Semester tuition and academic charges.",
     amount: 220000,
     color: "from-emerald-600 to-green-400",
   },
   {
-    id: "acceptance-fees",
+    id: "Course-fees",
     name: "Acceptance Fees",
     description: "One-time admission processing fee.",
     amount: 55000,
@@ -41,8 +41,8 @@ export const paymentCategories: PaymentCategory[] = [
 export const recentTransactions: Transaction[] = [
   {
     id: "1",
-    receipt: "SCSPAY-2026-0045",
-    type: "NACOS Dues",
+    receipt: "T268989712047363",
+    type: "Registration",
     amount: 2000,
     date: "05 JUN 2026",
     status: "Successful",
@@ -51,8 +51,8 @@ export const recentTransactions: Transaction[] = [
   },
   {
     id: "2",
-    receipt: "SCSPAY-2026-0041",
-    type: "T-Shirt / ID Card",
+    receipt: "T268989712047920",
+    type: "Registration",
     amount: 7500,
     date: "03 JUN 2026",
     status: "Successful",

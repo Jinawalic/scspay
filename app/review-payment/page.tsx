@@ -41,18 +41,45 @@ function ReviewPaymentContent() {
       amount: 1500,
     };
 
-  const handlePay = () => {
+  const [error, setError] = useState<string | null>(null);
+
+  const handlePay = async () => {
     setIsProcessing(true);
-    setTimeout(() => {
-      window.location.href = "/payment-success";
-    }, 2000);
+    setError(null);
+    try {
+      const res = await fetch("/api/paystack/initialize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          // Use a real student email in production; this uses the mock profile email
+          email: "student@scspay.ng",
+          amount: paymentDetails.amount,
+          metadata: {
+            payment_type: paymentDetails.title,
+            selected_item: paymentDetails.selectedItem,
+          },
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.authorizationUrl) {
+        throw new Error(data.error ?? "Failed to initialize payment");
+      }
+
+      // Redirect browser to Paystack hosted checkout
+      window.location.href = data.authorizationUrl;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+      setIsProcessing(false);
+    }
   };
 
   return (
     <main className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-0 sm:p-6 md:p-10">
       <div className="w-full max-w-lg bg-white min-h-screen sm:min-h-0 sm:rounded-[2.5rem] border-none sm:border sm:border-slate-100 sm:shadow-[0_24px_70px_rgba(0,0,0,0.03)] p-6 sm:p-10 flex flex-col justify-between">
 
-        <div className="space-y-7">
+        <div className="space-y-3">
           {/* Header Navigation */}
           <div className="flex items-center justify-between">
             {/* Back Button */}
@@ -116,15 +143,28 @@ function ReviewPaymentContent() {
           </div>
         </div>
 
+        {/* Error message */}
+        {error && (
+          <p className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-xs font-semibold text-red-600 text-center">
+            {error}
+          </p>
+        )}
+
         {/* Pay Now Button */}
-        <div className="mt-4 pt-3">
+        <div className="mt-2 pt-3">
           <button
             type="button"
             onClick={handlePay}
             disabled={isProcessing}
-            className="w-full rounded-2xl bg-[#135A3D] py-4 text-center text-sm font-bold text-white shadow-md shadow-emerald-950/10 hover:bg-[#0E4E35] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="w-full rounded-2xl bg-[#135A3D] py-4 text-center text-sm font-bold text-white shadow-md shadow-emerald-950/10 hover:bg-[#0E4E35] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
           >
-            {isProcessing ? "Processing..." : "Pay Now"}
+            {isProcessing && (
+              <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+              </svg>
+            )}
+            {isProcessing ? "Redirecting to Paystack..." : "Pay Now"}
           </button>
         </div>
 
