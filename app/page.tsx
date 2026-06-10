@@ -4,44 +4,56 @@ import { LoginForm } from "@/components/auth/login-form";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen h-screen bg-[#F8FAFC] flex items-center justify-center overflow-hidden">
-      <div className="w-full">
-        <div className="grid min-h-screen h-screen grid-cols-1 md:grid-cols-2 gap-10 items-center justify-center">
-          {/* Left: Illustration & marketing (desktop-only) */}
-          <section className="hidden md:flex w-full h-screen rounded-xl bg-white px-18 p-8 shadow-sm relative overflow-hidden">
-            <div className="relative z-10 flex w-full max-w-md flex-col items-center justify-center gap-4 text-center">
-              <Image src="/images/login-bg.png" alt="Secure shield illustration" width={2000} height={2000} />
-              <div className="space-y-4">
-                <h1 className="text-3xl font-semibold leading-tight tracking-tight text-slate-950">Secured Payment Portal for Science Communication.</h1>
-                <p className="text-sm leading-7 text-slate-500">Pay school fees, acceptance fees, hostel charges, and more with a clean, secure student payment experience.</p>
-              </div>
-            </div>
-          </section>
+    <main className="min-h-screen bg-[#F8FAFC]">
+      {/* Mobile View: Styled exactly like the inspiration image */}
+      <div className="md:hidden flex flex-col min-h-screen w-full bg-slate-950/90 text-white relative">
+        {/* Top Section with Dark Background */}
+        <div className="h-[40vh] w-full flex flex-col items-center justify-center relative overflow-hidden z-10">
+          {/* Background Cover Image */}
+          <Image
+            src="/images/cover-bg.png"
+            alt="Cover background"
+            fill
+            className="object-cover object-center pointer-events-none"
+            priority
+          />
+          {/* Dark Overlay */}
+          <div className="absolute inset-0 bg-slate-950/75 z-0" />
+        </div>
 
-          {/* Right: Login card (always visible; on mobile it becomes the main view) */}
-          <div className="mx-auto w-full max-w-xl">
-            <div className="relative overflow-hidden rounded-xl md:hidden">
-              <Image src="/images/login-bg.png" alt="Login background" fill className="object-cover" />
-              <div className="absolute inset-0 bg-slate-950/40" />
-              <section className="relative mx-auto w-full rounded-xl border border-slate-200 bg-white/95 p-6 shadow-sm sm:p-8">
+        {/* Bottom card containing the Login Form */}
+        <div className="flex-1 bg-white rounded-t-[2.5rem] px-6 py-8 shadow-[0_-12px_40px_rgba(0,0,0,0.12)] flex flex-col justify-between text-[#1E2E42] relative z-20">
+          <LoginForm layout="mobile" />
+        </div>
+      </div>
+
+      {/* Desktop View: Keep original design */}
+      <div className="hidden md:flex min-h-screen w-full items-center justify-center overflow-hidden">
+        <div className="w-full">
+          <div className="grid min-h-screen h-screen grid-cols-2 gap-10 items-center justify-center">
+            {/* Left: Illustration & marketing */}
+            <section className="flex w-full h-screen rounded-xl bg-white px-18 p-8 shadow-sm relative overflow-hidden items-center justify-center">
+              <div className="relative z-10 flex w-full max-w-md flex-col items-center justify-center gap-4 text-center">
+                <Image src="/images/login-bg.png" alt="Secure shield illustration" width={2000} height={2000} />
+                <div className="space-y-4">
+                  <h1 className="text-3xl font-semibold leading-tight tracking-tight text-slate-950">Secured Payment Portal for Science Communication.</h1>
+                  <p className="text-sm leading-7 text-slate-500">Pay school fees, acceptance fees, hostel charges, and more with a clean, secure student payment experience.</p>
+                </div>
+              </div>
+            </section>
+
+            {/* Right: Login card */}
+            <div className="mx-auto w-full max-w-xl">
+              <section className="mx-auto w-full rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
                 <div className="mb-6 space-y-3 text-center sm:text-left">
                   <div>
                     <h2 className="text-2xl font-semibold text-slate-950">Welcome Back</h2>
                     <p className="mt-1 text-sm text-slate-500">Enter your credentials to sign in.</p>
                   </div>
                 </div>
-                <LoginForm />
+                <LoginForm layout="desktop" />
               </section>
             </div>
-            <section className="hidden md:block mx-auto w-full rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-              <div className="mb-6 space-y-3 text-center sm:text-left">
-                <div>
-                  <h2 className="text-2xl font-semibold text-slate-950">Welcome Back</h2>
-                  <p className="mt-1 text-sm text-slate-500">Enter your credentials to sign in.</p>
-                </div>
-              </div>
-              <LoginForm />
-            </section>
           </div>
         </div>
       </div>

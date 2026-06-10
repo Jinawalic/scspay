@@ -77,7 +77,7 @@ function ReviewPaymentContent() {
 
   return (
     <main className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-0 sm:p-6 md:p-10">
-      <div className="w-full max-w-lg bg-white min-h-screen sm:min-h-0 sm:rounded-[2.5rem] border-none sm:border sm:border-slate-100 sm:shadow-[0_24px_70px_rgba(0,0,0,0.03)] p-6 sm:p-10 flex flex-col justify-between">
+      <div className="w-full max-w-lg bg-white min-h-screen sm:min-h-0 sm:rounded-[2.5rem] border-none sm:border sm:border-slate-100 sm:shadow-[0_24px_70px_rgba(0,0,0,0.03)] p-6 sm:p-10 flex flex-col justify-start">
 
         <div className="space-y-3">
           {/* Header Navigation */}
@@ -151,7 +151,7 @@ function ReviewPaymentContent() {
         )}
 
         {/* Pay Now Button */}
-        <div className="mt-2 pt-3">
+        <div className="mt-6">
           <button
             type="button"
             onClick={handlePay}

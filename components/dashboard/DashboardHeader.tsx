@@ -1,4 +1,4 @@
-import { Bell } from "lucide-react";
+import { Bell, UserCircle } from "lucide-react";
 import { studentProfile } from "@/src/data/mock";
 
 export function DashboardHeader() {
@@ -6,8 +6,8 @@ export function DashboardHeader() {
     <div className="flex items-center justify-between">
       {/* User Avatar and Greeting */}
       <div className="flex items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold text-lg shadow-lg">
-          {studentProfile.fullName.charAt(0)}
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#EAF5F0] shadow-sm">
+          <UserCircle className="h-8 w-8 text-[#135A3D]" />
         </div>
         <div>
           <p className="text-sm font-medium text-slate-500">Welcome back</p>

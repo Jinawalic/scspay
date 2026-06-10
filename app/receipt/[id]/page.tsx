@@ -2,6 +2,7 @@
 
 import { useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { recentTransactions, studentProfile } from "@/src/data/mock";
 
 // ---------- Auto-print wrapper ----------
@@ -102,12 +103,12 @@ export default async function ReceiptPage({
 
         {/* Action buttons — hidden on print */}
         <div id="no-print" style={{ width: "100%", maxWidth: 400, marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <button
-            onClick={() => window.history.back()}
-            style={{ fontSize: 13, fontWeight: 600, color: "#135A3D", background: "none", border: "none", cursor: "pointer" }}
+          <Link
+            href="/dashboard"
+            style={{ fontSize: 13, fontWeight: 600, color: "#135A3D", background: "none", border: "none", cursor: "pointer", textDecoration: "none" }}
           >
             ← Back
-          </button>
+          </Link>
           <button
             onClick={() => window.print()}
             style={{ borderRadius: 999, background: "#135A3D", color: "white", padding: "8px 20px", fontSize: 13, fontWeight: 700, border: "none", cursor: "pointer" }}
