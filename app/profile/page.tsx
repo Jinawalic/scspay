@@ -55,22 +55,17 @@ export default function ProfilePage() {
           {/* Card container */}
           <div className="w-full max-w-lg bg-white min-h-screen sm:min-h-0 sm:rounded-[2.5rem] border-none sm:border sm:border-slate-100 sm:shadow-[0_24px_70px_rgba(0,0,0,0.03)] p-6 sm:p-10 pb-28 lg:pb-8 flex flex-col justify-start">
 
-            {/* Header: Title + Back Arrow */}
-            <div className="flex items-start justify-between mb-8">
-              <div>
-                <h1 className="text-xl font-bold text-[#1E2E42] tracking-tight">
-                  My Profile
-                </h1>
-                <p className="mt-1.5 text-xs font-semibold text-slate-400 leading-relaxed max-w-[240px]">
-                  Manage your student profile, wallet access, and preferences.
-                </p>
-              </div>
+            {/* Header: Back Arrow + Title */}
+            <div className="flex items-center gap-7 mb-3">
               <Link
                 href="/dashboard"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-100 bg-white text-[#1E2E42] shadow-sm transition hover:bg-slate-50 active:scale-95 shrink-0 mt-0.5"
+                className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-slate-50 transition active:scale-95 text-[#1E2E42]"
               >
-                <ChevronLeft className="h-5 w-5 stroke-[2.5]" />
+                <ChevronLeft className="h-6 w-6 stroke-[2.5]" />
               </Link>
+              <h1 className="text-xl font-bold text-[#1E2E42]">
+                My Profile
+              </h1>
             </div>
 
             {/* Profile Avatar Card */}
