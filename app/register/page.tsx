@@ -18,7 +18,7 @@ export default function RegisterPage() {
             priority
           />
           {/* Dark Overlay */}
-          <div className="absolute inset-0 bg-slate-950/75 z-0" />
+          <div className="absolute inset-0 bg-slate-950/45 z-0" />
         </div>
 
         {/* Bottom card containing the Register Form */}

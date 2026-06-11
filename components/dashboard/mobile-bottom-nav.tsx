@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FileText, Home, UserCircle } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -12,6 +13,25 @@ const navItems = [
 
 export function MobileBottomNav() {
   const pathname = usePathname();
+  const [shouldHide, setShouldHide] = useState(false);
+
+  useEffect(() => {
+    const checkModal = () => {
+      const modalOpen = document.body.classList.contains("registration-modal-open");
+      setShouldHide(modalOpen);
+    };
+
+    // Initial check
+    checkModal();
+
+    // Observe body class changes
+    const observer = new MutationObserver(checkModal);
+    observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+    return () => observer.disconnect();
+  }, []);
+
+  if (shouldHide) return null;
 
   return (
     <div className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-lg lg:hidden">
