@@ -15,11 +15,17 @@ export function DesktopSidebar() {
 
   return (
     <aside className="fixed z-40 hidden w-64 h-full bg-white p-6 lg:block border-r border-slate-200">
-      {/* Logo/Brand */}
-      <div className="mb-10">
-        <h1 className="text-2xl font-bold text-slate-800">MyPay</h1>
-        <p className="mt-1 text-sm text-slate-400">Payment System</p>
-      </div>
+      {/* Brand Logo Wrapper */}
+        <div className="flex items-center gap-2.5 px-2 py-1">
+          <div className="flex flex-col gap-0.5 justify-center">
+            <div className="flex items-center gap-1">
+              <img src="/images/logo.png" alt="MyPay Logo" className="h-12 w-12 rounded-full object-contain" />
+              <span className="text-[18px] font-bold text-emerald-800 tracking-tight font-sans pl-1">
+                MyPay
+              </span>
+            </div>
+          </div>
+        </div>
 
       {/* Navigation Items */}
       <nav className="space-y-2">

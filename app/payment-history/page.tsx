@@ -250,7 +250,7 @@ export default function PaymentHistoryPage() {
           </div>
 
           {/* ========================================== */}
-          {/* DATA DATA MANAGEMENT FRAMEWORK GRID CONTAINER */}
+          {/* DATA MANAGEMENT FRAMEWORK GRID CONTAINER */}
           {/* ========================================== */}
           <Card className="w-full max-w-lg md:max-w-full min-h-screen sm:min-h-0 sm:rounded-xl sm:border md:border md:border-slate-200 p-4 sm:p-6 md:p-6 pb-24 lg:pb-6 flex flex-col justify-start mx-auto">
 

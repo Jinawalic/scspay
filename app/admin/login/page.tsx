@@ -28,7 +28,7 @@ export default function AdminLoginPage() {
     // Simulated API call delay before routing to dashboard
     setTimeout(() => {
       setIsLoading(false);
-      router.push("/dashboard"); 
+      router.push("/admin/dashboard"); 
     }, 2000);
   };
 
@@ -160,7 +160,7 @@ export default function AdminLoginPage() {
                 />
               </svg>
             ) : (
-              "Login"
+              "Access Control Panel"
             )}
           </button>
 
@@ -189,19 +189,6 @@ export default function AdminLoginPage() {
                 width={58}
                 height={58}
               />
-            </button>
-          </div>
-
-          {/* Registration Redirect Layout Unit Context */}
-          <div className="text-center text-xs text-slate-500 font-semibold pt-2">
-            Don't have an account?{" "}
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={() => router.push("/register")}
-              className="text-emerald-800 font-bold hover:underline transition disabled:opacity-40"
-            >
-              Register here
             </button>
           </div>
         </form>
