@@ -150,7 +150,7 @@ export const recentTransactions: Transaction[] = [
 ];
 
 export const studentProfile: StudentProfile = {
-  fullName: "Jinawatitus",
+  fullName: "Jinawa Titus",
   email: "jinawatitus@gmail.com",
   matricNumber: "FT2002019",
   faculty: "Natural And Applied Sciences",

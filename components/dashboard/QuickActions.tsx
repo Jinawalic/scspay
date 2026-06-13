@@ -34,7 +34,7 @@ export function QuickActions() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold text-[#1E2E42] md:text-2xl">
+      <h2 className="text-xl font-bold text-[#1E2E42] md:text-xl">
         Quick Actions
       </h2>
       <div className="grid grid-cols-2 gap-4 sm:gap-6">
@@ -45,7 +45,7 @@ export function QuickActions() {
               <button
                 key={index}
                 onClick={() => setIsModalOpen(true)}
-                className="group flex flex-col items-center justify-center rounded-xl border border-slate-100/80 bg-white p-6 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
+                className="group flex flex-col items-center justify-center rounded-xl border border-slate-100/80 bg-white p-6 border-slate-200 transition-all duration-200 hover:scale-[1.02] hover:hover:bg-white active:scale-[0.98]"
               >
                 <div
                   className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 ${action.bgClass}`}
@@ -62,7 +62,7 @@ export function QuickActions() {
             <Link
               key={index}
               href={action.href}
-              className="group flex flex-col items-center justify-center rounded-xl border border-slate-100/80 bg-white p-6 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
+              className="group flex flex-col items-center justify-center rounded-xl border border-slate-100/80 bg-white p-6 border-slate-200 transition-all duration-200 hover:scale-[1.02] hover:hover:bg-white active:scale-[0.98]"
             >
               <div
                 className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 ${action.bgClass}`}

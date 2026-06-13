@@ -1,6 +1,6 @@
 export function PaymentStatus() {
   return (
-    <div className="flex items-center justify-between rounded-xl bg-white px-6 py-4 shadow-sm">
+    <div className="flex items-center justify-between rounded-xl border border-slate-200 px-6 py-4 hover:bg-white transition-colors">
       {/* Payment Status Text */}
       <div>
         <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-400">
@@ -10,7 +10,7 @@ export function PaymentStatus() {
       </div>
 
       {/* Pending Pill */}
-      <div className="rounded-full bg-white px-6 py-2.5 shadow-md">
+      <div className="rounded-full bg-white px-6 py-2.5 border border-slate-200">
         <p className="text-sm font-semibold text-orange-500">Pending</p>
       </div>
     </div>

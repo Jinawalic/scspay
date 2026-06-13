@@ -20,7 +20,7 @@ export function TransactionCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3 }}
-      className="rounded-xl border border-slate-100 bg-white p-3 transition-shadow hover:shadow-md"
+      className="rounded-xl border border-slate-200 p-3 cursor-pointer hover:bg-white"
     >
       <div className="flex items-center justify-between gap-4">
         {/* Left Section: Icon and Details */}

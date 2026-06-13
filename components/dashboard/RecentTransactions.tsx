@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Receipt } from "lucide-react";
 import { recentTransactions } from "@/src/data/mock";
 import { TransactionCard } from "./TransactionCard";
+import { RecentTransactionTable } from "./RecentTransactionTable";
 import { AnimatePresence } from "framer-motion";
 
 export function RecentTransactions() {
@@ -29,28 +30,38 @@ export function RecentTransactions() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Centered Section Title */}
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-[#1E2E42]">
-          Recent Transactions
-        </h2>
+    <div className="space-y-2 mt-3">
+      {/* Wrapped both the title and search input inside a container 
+        that hides entirely on desktop view (md:hidden)
+      */}
+      <div className="block md:hidden space-y-2">
+        {/* Centered Section Title */}
+        <div className="text-center">
+          <h3 className="text-xl font-bold text-[#1E2E42]">
+            Recent Transactions
+          </h3>
+        </div>
+
+        {/* Search History Input */}
+        <div className="relative">
+          <Receipt className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search history..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-2xl border-none bg-slate-200/50 py-3.5 pl-12 pr-4 text-sm font-semibold text-[#1E2E42] outline-none placeholder:text-slate-400 focus:bg-slate-200/70 focus:ring-1 focus:ring-slate-300 transition-all"
+          />
+        </div>
       </div>
 
-      {/* Search History Input */}
-      <div className="relative">
-        <Receipt className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-        <input
-          type="text"
-          placeholder="Search history..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full rounded-2xl border-none bg-slate-200/50 py-3.5 pl-12 pr-4 text-sm font-semibold text-[#1E2E42] outline-none placeholder:text-slate-400 focus:bg-slate-200/70 focus:ring-1 focus:ring-slate-300 transition-all"
-        />
+      {/* Desktop: Recent Transactions table shown under search input */}
+      <div className="hidden md:block mt-4">
+        <RecentTransactionTable transactions={filteredTransactions} />
       </div>
 
-      {/* Transactions List */}
-      <div className="flex flex-col gap-4">
+      {/* Transactions List (mobile only) */}
+      <div className="md:hidden flex flex-col gap-4">
         {filteredTransactions.length > 0 ? (
           <AnimatePresence mode="popLayout">
             {filteredTransactions.map((transaction) => (

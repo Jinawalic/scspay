@@ -22,9 +22,9 @@ export async function POST(request: NextRequest) {
     // Amount must be in kobo (multiply by 100)
     const amountInKobo = Math.round(amount * 100);
 
-    const callbackUrl = `${
-      process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000"
-    }/payment-success`;
+    // Dynamically retrieve the current request origin to support Vercel deployments out-of-the-box
+    const origin = request.nextUrl.origin || process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    const callbackUrl = `${origin}/payment-success`;
 
     const res = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",

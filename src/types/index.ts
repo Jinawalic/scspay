@@ -18,6 +18,7 @@ export type Transaction = {
 };
 
 export type StudentProfile = {
+  role: string;
   fullName: string;
   email: string;
   matricNumber: string;

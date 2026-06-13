@@ -9,9 +9,9 @@ export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-[#F4F6F8]">
       <DesktopSidebar />
-      <div className="lg:ml-72">
+      <div className="lg:ml-60">
         <div className="px-4 py-8 sm:px-6 lg:px-10">
-          <div className="mx-auto max-w-5xl space-y-8 pb-24 lg:pb-8">
+          <div className="mx-auto max-w-5xl space-y-2 pb-4 lg:pb-2">
             <DashboardHeader />
             <PaymentStatus />
             <QuickActions />

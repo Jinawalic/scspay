@@ -1,15 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
-  UserCircle,
-  Hash,
-  BookOpen,
-  Phone,
+  User,
   Mail,
-  LogOut,
+  Phone,
+  Briefcase,
+  Lock,
+  Eye,
+  EyeOff,
+  Camera
 } from "lucide-react";
 import { studentProfile } from "@/src/data/mock";
 import { MobileBottomNav } from "@/components/dashboard/mobile-bottom-nav";
@@ -18,112 +21,221 @@ import { DesktopSidebar } from "@/components/dashboard/DesktopSidebar";
 export default function ProfilePage() {
   const router = useRouter();
 
-  const handleLogout = () => {
-    // Clear any session/auth tokens here in production
-    router.push("/");
-  };
+  // Password Input States
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const profileFields = [
-    {
-      label: "MATRICULATION NUMBER",
-      value: studentProfile.matricNumber,
-      icon: Hash,
-    },
-    {
-      label: "DEPARTMENT",
-      value: studentProfile.department,
-      icon: BookOpen,
-    },
-    {
-      label: "PHONE",
-      value: `+234 ${studentProfile.phone}`,
-      icon: Phone,
-    },
-    {
-      label: "EMAIL",
-      value: studentProfile.email,
-      icon: Mail,
-    },
-  ];
+  // Visibility Toggles
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   return (
-    <main className="min-h-screen bg-[#F4F6F8]">
+    <main className="min-h-screen bg-[#F8FAFC]">
       <DesktopSidebar />
 
-      <div className="lg:ml-72">
-        <div className="px-0 sm:px-6 lg:px-10 py-0 sm:py-8 flex justify-center">
-          {/* Card container */}
-          <div className="w-full max-w-lg bg-white min-h-screen sm:min-h-0 sm:rounded-[2.5rem] border-none sm:border sm:border-slate-100 sm:shadow-[0_24px_70px_rgba(0,0,0,0.03)] p-6 sm:p-10 pb-28 lg:pb-8 flex flex-col justify-start">
-
-            {/* Header: Back Arrow + Title */}
-            <div className="flex items-center gap-7 mb-3">
+      <div className="lg:ml-64">
+        {/* Core Layout Structure Wrapper */}
+        <div className="px-4 sm:px-6 lg:px-8 py-6 max-w-5xl mx-auto space-y-2 pb-24 lg:pb-8">
+          
+          {/* Top Title/Navigation Header Bar */}
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div className="flex items-center gap-3">
               <Link
                 href="/dashboard"
-                className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-slate-50 transition active:scale-95 text-[#1E2E42]"
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition md:hidden"
               >
-                <ChevronLeft className="h-6 w-6 stroke-[2.5]" />
+                <ChevronLeft className="h-5 w-5" />
               </Link>
-              <h1 className="text-xl font-bold text-[#1E2E42]">
-                My Profile
-              </h1>
+              <h1 className="text-xl font-bold text-slate-900">My Profile</h1>
             </div>
+            <div className="flex items-center gap-2">
+              <button className="px-4 py-2 text-xs text-slate-700 border border-slate-200 rounded-xl hover:bg-slate-100white transition">
+                View Activity
+              </button>
+            </div>
+          </div>
 
-            {/* Profile Avatar Card */}
-            <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_4px_18px_rgba(0,0,0,0.03)] mb-2">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#EAF5F0] shrink-0">
-                <UserCircle className="h-9 w-9 text-[#135A3D]" />
+          {/* ========================================== */}
+          {/* PROFILE AVATAR BLOCK CARD                  */}
+          {/* ========================================== */}
+          <div className="w-full rounded-xl border border-slate-200 p-6 flex flex-col sm:flex-row items-center gap-6 hover:bg-white transition">
+            <div className="relative group cursor-pointer">
+              <div className="h-15 w-15 rounded-full border border-slate-100 bg-[#EAF5F0] flex items-center justify-center text-[#135A3D] overflow-hidden">
+                <User className="h-10 w-10 stroke-[1.5]" />
               </div>
-              <div>
-                <h2 className="text-base font-bold text-[#1E2E42]">
-                  {studentProfile.fullName}
-                </h2>
-                <p className="text-xs font-semibold text-slate-400 mt-0.5">
-                  NACOS Member since 2026
-                </p>
+              <div className="absolute bottom-0 right-0 h-6 w-6 bg-[#135A3D] rounded-full border-2 border-white flex items-center justify-center text-white">
+                <Camera className="h-3 w-3" />
               </div>
             </div>
 
-            {/* Detail Fields */}
-            <div className="flex flex-col gap-1">
-              {profileFields.map((field) => {
-                const IconComponent = field.icon;
-                return (
-                  <div
-                    key={field.label}
-                    className="flex items-center gap-4 rounded-2xl px-4 py-4 hover:bg-slate-50/60 transition"
-                  >
-                    {/* Icon */}
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#EAF5F0] shrink-0">
-                      <IconComponent className="h-5 w-5 text-[#135A3D]" />
-                    </div>
-
-                    {/* Label & Value */}
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[9px] font-bold text-[#135A3D] uppercase tracking-widest">
-                        {field.label}
-                      </p>
-                      <p className="text-sm font-bold text-[#1E2E42] mt-0.5 truncate">
-                        {field.value}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="text-center sm:text-left space-y-1 flex-1">
+              <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+                {studentProfile.fullName || "Natashia Khaleira"}
+              </h2>
+              <p className="text-xs font-bold text-[#135A3D] uppercase tracking-wider bg-[#EAF5F0] inline-block px-2.5 py-0.5 rounded-md">
+                {studentProfile.role || "Student"}
+              </p>
             </div>
+          </div>
 
-            {/* Logout Button */}
-            <div className="mt-8">
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="w-full flex items-center justify-center gap-2.5 rounded-2xl border border-red-100 bg-red-50/60 py-4 text-sm font-bold text-red-600 transition hover:bg-red-100/80 active:scale-[0.99] cursor-pointer"
-              >
-                <LogOut className="h-4.5 w-4.5" />
-                Logout
+          {/* ========================================== */}
+          {/* PERSONAL INFORMATION CARD BLOCK            */}
+          {/* ========================================== */}
+          <div className="w-full rounded-xl border border-slate-200 p-6 space-y-2 hover:bg-white transition">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-bold text-slate-800 tracking-tight uppercase tracking-wider">
+                Personal Information
+              </h3>
+              <button className="text-xs font-bold text-[#135A3D] hover:underline bg-[#EAF5F0] px-3 py-1.5 rounded-xl transition">
+                Enable Editing
               </button>
             </div>
 
+            {/* Responsive Balanced Grid Data Columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-8">
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">
+                  Matriculation Number
+                </span>
+                <div className="text-sm font-bold text-slate-800 break-words">
+                  {studentProfile.matricNumber || "NCS/2022/0048"}
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">
+                  Department
+                </span>
+                <div className="text-sm font-bold text-slate-800 break-words">
+                  {studentProfile.department || "Computer Science"}
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">
+                  Registered Email Address
+                </span>
+                <div className="text-sm font-bold text-slate-800 break-words flex items-center gap-1.5">
+                  <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                  {studentProfile.email || "info@binary-fusion.com"}
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">
+                  Phone Number
+                </span>
+                <div className="text-sm font-bold text-slate-800 break-words flex items-center gap-1.5">
+                  <Phone className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                  {studentProfile.phone ? `+234 ${studentProfile.phone}` : "(+234) 812-554-5846"}
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">
+                  Current Session Role
+                </span>
+                <div className="text-sm font-bold text-slate-800 break-words flex items-center gap-1.5">
+                  <Briefcase className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                  Student Member
+                </div>
+              </div>
+            </div>
           </div>
+
+          {/* ========================================== */}
+          {/* PASSWORD UPDATE INTERACTIVE SECTION        */}
+          {/* ========================================== */}
+          <div className="w-full rounded-xl border border-slate-200 p-6 space-y-2 hover:bg-white">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-bold text-slate-800 tracking-tight uppercase tracking-wider">
+                Security & Credentials
+              </h3>
+              <button className="text-xs font-bold text-white bg-[#135A3D] hover:bg-[#0e442e] px-4 py-1.5 rounded-xl transition">
+                Save Changes
+              </button>
+            </div>
+
+            {/* Inputs responsive stack to full wide dynamic row layout */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              
+              {/* Current Password Field */}
+              <div className="space-y-1.5 w-full">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
+                  Current Password
+                </label>
+                <div className="relative w-full">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 shrink-0" />
+                  <input
+                    type={showCurrent ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full text-xs font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-10 outline-none placeholder:text-slate-300 focus:bg-white focus:border-slate-300 transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrent(!showCurrent)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition"
+                  >
+                    {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* New Password Field */}
+              <div className="space-y-1.5 w-full">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
+                  New Password
+                </label>
+                <div className="relative w-full">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 shrink-0" />
+                  <input
+                    type={showNew ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full text-xs font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-10 outline-none placeholder:text-slate-300 focus:bg-white focus:border-slate-300 transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNew(!showNew)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition"
+                  >
+                    {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm Password Field */}
+              <div className="space-y-1.5 w-full">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
+                  Confirm Password
+                </label>
+                <div className="relative w-full">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 shrink-0" />
+                  <input
+                    type={showConfirm ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full text-xs font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-10 outline-none placeholder:text-slate-300 focus:bg-white focus:border-slate-300 transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition"
+                  >
+                    {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
         </div>
       </div>
 
