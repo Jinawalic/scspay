@@ -134,7 +134,7 @@ export default async function ReceiptPage({
                 <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#135A3D" }} />
               </div>
               <span style={{ fontSize: 18, fontWeight: 900, color: "#1E2E42", letterSpacing: "-0.3px" }}>
-                SCS <span style={{ color: "#135A3D" }}>PAY</span>
+                My <span style={{ color: "#135A3D" }}>Pay</span>
               </span>
             </div>
             <span style={{ fontSize: 10, fontWeight: 700, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.12em" }}>
@@ -159,7 +159,7 @@ export default async function ReceiptPage({
                   userSelect: "none",
                 }}
               >
-                SCS PAY
+                MyPay
               </span>
             ))}
           </div>

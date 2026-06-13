@@ -6,14 +6,20 @@ import { useSearchParams } from "next/navigation";
 import { ChevronLeft, X } from "lucide-react";
 import { paymentCategories } from "@/src/data/mock";
 import { PaymentSummary } from "@/components/payment/payment-summary";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 
 export default function ReviewPaymentPage() {
   return (
     <Suspense fallback={
-      <main className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-0 sm:p-6 md:p-10">
-        <div className="w-full max-w-lg bg-white min-h-screen sm:min-h-0 sm:rounded-[2.5rem] border-none sm:border sm:border-slate-100 sm:shadow-[0_24px_70px_rgba(0,0,0,0.03)] p-6 sm:p-10 flex flex-col justify-center items-center">
+      <main className="min-h-screen bg-[#F8FAFC] relative flex flex-col items-center justify-center p-0 sm:p-6 md:p-10">
+        <div className="pointer-events-none hidden md:block fixed inset-0 z-0 bg-slate-950/45 backdrop-blur-[2px]" />
+        <Card className="relative z-10 w-full max-w-lg bg-white min-h-screen sm:min-h-0 sm:rounded-[2.5rem] border-none sm:border sm:border-slate-100 sm:shadow-[0_24px_70px_rgba(0,0,0,0.03)] md:max-w-[660px] md:max-h-[calc(100vh-5rem)] md:overflow-y-auto md:rounded-[2.75rem] md:border md:border-slate-100/80 md:shadow-[0_40px_120px_rgba(15,23,42,0.22)] p-6 sm:p-10 flex flex-col justify-center items-center gap-3">
+          <LoadingSkeleton className="h-4 w-40 rounded-full" />
           <p className="text-sm text-slate-500 font-semibold">Loading payment details...</p>
-        </div>
+        </Card>
       </main>
     }>
       <ReviewPaymentContent />
@@ -76,8 +82,9 @@ function ReviewPaymentContent() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-0 sm:p-6 md:p-10">
-      <div className="w-full max-w-lg bg-white min-h-screen sm:min-h-0 sm:rounded-[2.5rem] border-none sm:border sm:border-slate-100 sm:shadow-[0_24px_70px_rgba(0,0,0,0.03)] p-6 sm:p-10 flex flex-col justify-start">
+    <main className="min-h-screen bg-[#F8FAFC] relative flex flex-col items-center justify-center p-0 sm:p-6 md:p-10">
+      <div className="pointer-events-none hidden md:block fixed inset-0 z-0 bg-slate-950/45 backdrop-blur-[2px]" />
+      <Card className="relative z-10 w-full max-w-lg bg-white min-h-screen sm:min-h-0 sm:rounded-[2.5rem] border-none sm:border sm:border-slate-100 sm:shadow-[0_24px_70px_rgba(0,0,0,0.03)] md:max-w-[660px] md:max-h-[calc(100vh-5rem)] md:overflow-y-auto md:rounded-[2.75rem] md:border md:border-slate-100/80 md:shadow-[0_40px_120px_rgba(15,23,42,0.22)] p-6 sm:p-10 flex flex-col justify-start">
 
         <div className="space-y-3">
           {/* Header Navigation */}
@@ -137,9 +144,9 @@ function ReviewPaymentContent() {
                 Paystack
               </p>
             </div>
-            <span className="rounded-full bg-[#EAF2EE] px-3 py-1.5 text-[10px] font-bold text-[#135A3D]">
+            <Badge className="rounded-full bg-[#EAF2EE] px-3 py-1.5 text-[10px] font-bold text-[#135A3D]">
               Secure
-            </span>
+            </Badge>
           </div>
         </div>
 
@@ -152,23 +159,23 @@ function ReviewPaymentContent() {
 
         {/* Pay Now Button */}
         <div className="mt-6">
-          <button
-            type="button"
-            onClick={handlePay}
-            disabled={isProcessing}
-            className="w-full rounded-2xl bg-[#135A3D] py-4 text-center text-sm font-bold text-white shadow-md shadow-emerald-950/10 hover:bg-[#0E4E35] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
-          >
-            {isProcessing && (
-              <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-              </svg>
-            )}
-            {isProcessing ? "Redirecting to Paystack..." : "Pay Now"}
-          </button>
+            <Button
+              type="button"
+              onClick={handlePay}
+              disabled={isProcessing}
+            className="w-full bg-[#135A3D] py-4 text-center text-sm font-bold text-white shadow-md shadow-emerald-950/10 hover:bg-[#0E4E35] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+            >
+              {isProcessing && (
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                </svg>
+              )}
+              {isProcessing ? "Redirecting to Paystack..." : "Pay Now"}
+            </Button>
         </div>
 
-      </div>
+      </Card>
     </main>
   );
 }

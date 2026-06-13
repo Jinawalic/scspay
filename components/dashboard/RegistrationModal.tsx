@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, ChevronDown, Check } from "lucide-react";
 import { faculties } from "@/src/data/mock";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
 type RegistrationModalProps = {
   isOpen: boolean;
@@ -81,12 +82,14 @@ export function RegistrationModal({
           <h2 className="text-2xl font-bold text-[#1E2E42]">
             Complete Registration
           </h2>
-          <button
+          <Button
+            type="button"
             onClick={onClose}
+            variant="ghost"
             className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Description */}
@@ -182,13 +185,14 @@ export function RegistrationModal({
         </div>
 
         {/* Submit Button */}
-        <button
+        <Button
+          type="button"
           onClick={handleSubmit}
           disabled={!selectedFaculty || !selectedDepartment}
           className="w-full rounded-full bg-[#135A3D] py-4 text-sm font-bold text-white shadow-md shadow-emerald-950/10 hover:bg-[#0E5C46] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
           Complete Registration
-        </button>
+        </Button>
       </motion.div>
     </motion.div>
   );

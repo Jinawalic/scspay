@@ -17,6 +17,11 @@ import {
 import { studentProfile } from "@/src/data/mock";
 import { MobileBottomNav } from "@/components/dashboard/mobile-bottom-nav";
 import { DesktopSidebar } from "@/components/dashboard/DesktopSidebar";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Avatar } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -51,20 +56,20 @@ export default function ProfilePage() {
               <h1 className="text-xl font-bold text-slate-900">My Profile</h1>
             </div>
             <div className="flex items-center gap-2">
-              <button className="px-4 py-2 text-xs text-slate-700 border border-slate-200 rounded-xl hover:bg-slate-100white transition">
+              <Button variant="secondary" className="px-4 py-2 text-xs text-slate-700">
                 View Activity
-              </button>
+              </Button>
             </div>
           </div>
 
           {/* ========================================== */}
           {/* PROFILE AVATAR BLOCK CARD                  */}
           {/* ========================================== */}
-          <div className="w-full rounded-xl border border-slate-200 p-6 flex flex-col sm:flex-row items-center gap-6 hover:bg-white transition">
+          <Card className="w-full rounded-xl border border-slate-200 p-6 flex flex-col sm:flex-row items-center gap-6 hover:bg-white transition">
             <div className="relative group cursor-pointer">
-              <div className="h-15 w-15 rounded-full border border-slate-100 bg-[#EAF5F0] flex items-center justify-center text-[#135A3D] overflow-hidden">
+              <Avatar className="h-15 w-15 bg-[#EAF5F0] text-[#135A3D] overflow-hidden">
                 <User className="h-10 w-10 stroke-[1.5]" />
-              </div>
+              </Avatar>
               <div className="absolute bottom-0 right-0 h-6 w-6 bg-[#135A3D] rounded-full border-2 border-white flex items-center justify-center text-white">
                 <Camera className="h-3 w-3" />
               </div>
@@ -74,23 +79,23 @@ export default function ProfilePage() {
               <h2 className="text-lg font-bold text-slate-900 tracking-tight">
                 {studentProfile.fullName || "Natashia Khaleira"}
               </h2>
-              <p className="text-xs font-bold text-[#135A3D] uppercase tracking-wider bg-[#EAF5F0] inline-block px-2.5 py-0.5 rounded-md">
+              <Badge className="text-xs font-bold text-[#135A3D] uppercase tracking-wider bg-[#EAF5F0] inline-block px-2.5 py-0.5 rounded-md">
                 {studentProfile.role || "Student"}
-              </p>
+              </Badge>
             </div>
-          </div>
+          </Card>
 
           {/* ========================================== */}
           {/* PERSONAL INFORMATION CARD BLOCK            */}
           {/* ========================================== */}
-          <div className="w-full rounded-xl border border-slate-200 p-6 space-y-2 hover:bg-white transition">
+          <Card className="w-full rounded-xl border border-slate-200 p-6 space-y-2 hover:bg-white transition">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-sm font-bold text-slate-800 tracking-tight uppercase tracking-wider">
                 Personal Information
               </h3>
-              <button className="text-xs font-bold text-[#135A3D] hover:underline bg-[#EAF5F0] px-3 py-1.5 rounded-xl transition">
+              <Button variant="secondary" className="text-xs font-bold text-[#135A3D] bg-[#EAF5F0] px-3 py-1.5 rounded-xl transition">
                 Enable Editing
-              </button>
+              </Button>
             </div>
 
             {/* Responsive Balanced Grid Data Columns */}
@@ -143,19 +148,19 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
-          </div>
+          </Card>
 
           {/* ========================================== */}
           {/* PASSWORD UPDATE INTERACTIVE SECTION        */}
           {/* ========================================== */}
-          <div className="w-full rounded-xl border border-slate-200 p-6 space-y-2 hover:bg-white">
+          <Card className="w-full rounded-xl border border-slate-200 p-6 space-y-2 hover:bg-white">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-sm font-bold text-slate-800 tracking-tight uppercase tracking-wider">
                 Security & Credentials
               </h3>
-              <button className="text-xs font-bold text-white bg-[#135A3D] hover:bg-[#0e442e] px-4 py-1.5 rounded-xl transition">
+              <Button className="text-xs font-bold text-white bg-[#135A3D] hover:bg-[#0e442e] px-4 py-1.5 rounded-xl transition">
                 Save Changes
-              </button>
+              </Button>
             </div>
 
             {/* Inputs responsive stack to full wide dynamic row layout */}
@@ -168,7 +173,7 @@ export default function ProfilePage() {
                 </label>
                 <div className="relative w-full">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 shrink-0" />
-                  <input
+                  <Input
                     type={showCurrent ? "text" : "password"}
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
@@ -192,7 +197,7 @@ export default function ProfilePage() {
                 </label>
                 <div className="relative w-full">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 shrink-0" />
-                  <input
+                  <Input
                     type={showNew ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
@@ -216,7 +221,7 @@ export default function ProfilePage() {
                 </label>
                 <div className="relative w-full">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 shrink-0" />
-                  <input
+                  <Input
                     type={showConfirm ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
@@ -234,7 +239,7 @@ export default function ProfilePage() {
               </div>
 
             </div>
-          </div>
+          </Card>
 
         </div>
       </div>

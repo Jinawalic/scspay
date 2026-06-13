@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, X, Check } from "lucide-react";
 import { paymentCategories } from "@/src/data/mock";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 export default function MakePaymentPage() {
   const [selectedId, setSelectedId] = useState(paymentCategories[0].id);
 
@@ -30,9 +32,10 @@ export default function MakePaymentPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-0 sm:p-6 md:p-10">
+    <main className="min-h-screen bg-[#F8FAFC] relative flex flex-col items-center justify-center p-0 sm:p-6 md:p-10">
+      <div className="pointer-events-none hidden md:block fixed inset-0 z-0 bg-slate-950/45 backdrop-blur-[2px]" />
       {/* Centered Mobile-Style Payment Card on Desktop, full screen on Mobile */}
-      <div className="w-full max-w-lg bg-white min-h-screen sm:min-h-0 sm:rounded-[2.5rem] border-none sm:border sm:border-slate-100 sm:shadow-[0_24px_70px_rgba(0,0,0,0.03)] p-6 sm:p-10 flex flex-col justify-between">
+      <Card className="relative z-10 w-full max-w-lg bg-white min-h-screen sm:min-h-0 sm:rounded-[2.5rem] border-none sm:border sm:border-slate-100 sm:shadow-[0_24px_70px_rgba(0,0,0,0.03)] md:max-w-[660px] md:max-h-[calc(100vh-5rem)] md:overflow-y-auto md:rounded-[2.75rem] md:border md:border-slate-100/80 md:shadow-[0_40px_120px_rgba(15,23,42,0.22)] p-6 sm:p-10 flex flex-col justify-between">
 
         <div className="space-y-8">
           {/* Header Navigation */}
@@ -125,16 +128,16 @@ export default function MakePaymentPage() {
 
         {/* Proceed Button */}
         <div className="mt-8 pt-4">
-          <button
+          <Button
             type="button"
             onClick={handleProceed}
             className="w-full rounded-full bg-[#135A3D] py-4 text-center text-sm font-bold text-white shadow-md shadow-emerald-950/10 hover:bg-[#0E5C46] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
           >
             Proceed to Review
-          </button>
+          </Button>
         </div>
 
-      </div>
+      </Card>
     </main>
   );
 }

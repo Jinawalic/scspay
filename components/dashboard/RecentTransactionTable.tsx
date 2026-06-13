@@ -2,6 +2,8 @@
 
 import { Eye } from "lucide-react";
 import type { Transaction } from "@/src/types";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 // Update this mapping based on the categories/types present in your actual DB data
 const typeColors: Record<string, string> = {
@@ -19,12 +21,13 @@ export function RecentTransactionTable({
       {/* Header section with filter button */}
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-lg font-bold text-gray-900">Recent Transactions</h2>
-        <button 
-          type="button" 
+        <Button
+          type="button"
+          variant="secondary"
           className="p-2 border border-gray-200 rounded-xl hover:bg-gray-50 text-gray-600 transition"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-        </button>
+        </Button>
       </div>
 
       <div className="overflow-x-auto">
@@ -66,9 +69,9 @@ export function RecentTransactionTable({
                   
                   {/* Status Column */}
                   <td className="px-6 py-3 ">
-                    <span className="inline-flex items-center justify-center px-4 py-1.5 text-xs font-medium rounded-full bg-emerald-700 text-white tracking-wide min-w-[95px]">
+                    <Badge className="inline-flex items-center justify-center px-4 py-1.5 text-xs font-medium rounded-full bg-emerald-700 text-white tracking-wide min-w-[95px]">
                       {transaction.status === "Successful" ? "success" : transaction.status}
-                    </span>
+                    </Badge>
                   </td>
                   
                   {/* Action Column */}

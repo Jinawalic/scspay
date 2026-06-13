@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { RegisterForm } from "@/components/auth/register-form";
+import { Card } from "@/components/ui/card";
 
 export default function RegisterPage() {
   return (
@@ -22,9 +23,9 @@ export default function RegisterPage() {
         </div>
 
         {/* Bottom card containing the Register Form */}
-        <div className="flex-1 bg-white rounded-t-[2.5rem] px-6 py-8 shadow-[0_-12px_40px_rgba(0,0,0,0.12)] flex flex-col justify-between text-[#1E2E42] relative z-20">
+        <Card className="flex-1 bg-white rounded-t-[2.5rem] px-6 py-8 shadow-[0_-12px_40px_rgba(0,0,0,0.12)] flex flex-col justify-between text-[#1E2E42] relative z-20">
           <RegisterForm layout="mobile" />
-        </div>
+        </Card>
       </div>
 
       {/* Desktop View: Keep original design with split cols */}
@@ -44,7 +45,7 @@ export default function RegisterPage() {
 
             {/* Right: Register card */}
             <div className="mx-auto w-full max-w-xl">
-              <section className="mx-auto w-full rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+              <Card className="mx-auto w-full rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
                 <div className="mb-6 space-y-3 text-center sm:text-left">
                   <div>
                     <p className="text-sm uppercase tracking-[0.35em] text-[#135A3D] font-bold">Register</p>
@@ -53,7 +54,7 @@ export default function RegisterPage() {
                   </div>
                 </div>
                 <RegisterForm layout="desktop" />
-              </section>
+              </Card>
             </div>
           </div>
         </div>

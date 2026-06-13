@@ -123,13 +123,13 @@ export function LoginForm({ layout = "desktop" }: { layout?: "desktop" | "mobile
 
         {/* Bottom Actions */}
         <div className="pt-4 space-y-6">
-          <button
+          <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-2xl bg-[#135A3D] py-4 text-center text-sm font-bold text-white shadow-md shadow-emerald-950/10 hover:bg-[#0e4830] transition active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full bg-[#135A3D] py-4 text-center text-sm font-bold text-white shadow-md shadow-emerald-950/10 hover:bg-[#0e4830] transition active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
           >
             {isSubmitting ? "Logging in..." : "Continue"}
-          </button>
+          </Button>
 
           <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-slate-400">
             <span>Don&apos;t have an account?</span>

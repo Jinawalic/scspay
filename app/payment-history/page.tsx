@@ -22,6 +22,11 @@ import { recentTransactions } from "@/src/data/mock";
 import { DesktopSidebar } from "@/components/dashboard/DesktopSidebar";
 import { MobileBottomNav } from "@/components/dashboard/mobile-bottom-nav";
 import type { Transaction } from "@/src/types";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 
 // Helper to parse dates like "05 JUN 2026" or "10/06/2026, 19:48:41"
 const parseDate = (dateStr: string): Date => {
@@ -235,19 +240,19 @@ export default function PaymentHistoryPage() {
               <p className="text-sm font-medium text-slate-500 mt-0.5">View all payment records.</p>
             </div>
             <div className="flex items-center gap-3">
-              <button className="px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition">
+              <Button variant="secondary" className="px-4 py-2 text-sm font-semibold">
                 Edit view
-              </button>
-              <button className="px-4 py-2 text-sm font-semibold text-white bg-slate-900 rounded-xl hover:bg-slate-800 transition">
+              </Button>
+              <Button className="px-4 py-2 text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800">
                 Export data
-              </button>
+              </Button>
             </div>
           </div>
 
           {/* ========================================== */}
           {/* DATA DATA MANAGEMENT FRAMEWORK GRID CONTAINER */}
           {/* ========================================== */}
-          <div className="w-full max-w-lg md:max-w-full min-h-screen sm:min-h-0 sm:rounded-xl sm:border md:border md:border-slate-200 p-4 sm:p-6 md:p-6 pb-24 lg:pb-6 flex flex-col justify-start mx-auto">
+          <Card className="w-full max-w-lg md:max-w-full min-h-screen sm:min-h-0 sm:rounded-xl sm:border md:border md:border-slate-200 p-4 sm:p-6 md:p-6 pb-24 lg:pb-6 flex flex-col justify-start mx-auto">
 
             {/* Top Toolbar Level with Header Actions & Filters */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -273,12 +278,12 @@ export default function PaymentHistoryPage() {
                 {/* Desktop Embedded Layout Search Bar */}
                 <div className="hidden md:relative md:block w-64">
                   <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <input 
+                  <Input 
                     type="text" 
                     placeholder="Search transaction..." 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-4 text-xs font-semibold text-slate-800 outline-none placeholder:text-slate-400 focus:border-slate-300 transition-all"
+                    className="w-full rounded-xl border border-slate-200 py-2 pl-10 pr-4 text-xs font-semibold text-slate-800 outline-none placeholder:text-slate-400 focus:border-slate-300 transition-all"
                   />
                 </div>
 
@@ -301,7 +306,7 @@ export default function PaymentHistoryPage() {
                     </button>
 
                     {isDateOpen && (
-                      <div className="absolute left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:right-0 mt-2 z-50 w-50 rounded-2xl bg-white border border-slate-100 shadow-xl p-1.5 flex flex-col gap-0.5">
+                      <div className="absolute left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:right-0 mt-2 z-50 w-50 rounded-2xl bg-white border border-slate-100 p-1.5 flex flex-col gap-0.5">
                         {["All", "Today", "This Month", "Last 30 Days"].map((opt) => (
                           <button
                             key={opt}
@@ -337,7 +342,7 @@ export default function PaymentHistoryPage() {
                     </button>
 
                     {isServiceOpen && (
-                      <div className="absolute left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:right-0 mt-2 z-50 w-56 rounded-2xl bg-white border border-slate-100 shadow-xl p-1.5 flex flex-col gap-0.5">
+                      <div className="absolute left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:right-0 mt-2 z-50 w-56 rounded-2xl bg-white border border-slate-100 p-1.5 flex flex-col gap-0.5">
                         {["All", "School Fees", "Course Registration", "Hostel Fees", "T-Shirt / ID Card"].map((opt) => (
                           <button
                             key={opt}
@@ -394,18 +399,20 @@ export default function PaymentHistoryPage() {
                           </td>
 
                           <td className="py-4">
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold leading-none ${
-                              tx.status === "Successful" 
-                                ? "bg-emerald-50 text-emerald-700" 
-                                : tx.status === "Pending" 
-                                ? "bg-amber-50 text-amber-700" 
-                                : "bg-rose-50 text-rose-700"
-                            }`}>
+                            <Badge
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold leading-none ${
+                                tx.status === "Successful"
+                                  ? "bg-emerald-50 text-emerald-700"
+                                  : tx.status === "Pending"
+                                  ? "bg-amber-50 text-amber-700"
+                                  : "bg-rose-50 text-rose-700"
+                              }`}
+                            >
                               <span className={`h-1 w-1 rounded-full ${
                                 tx.status === "Successful" ? "bg-emerald-500" : tx.status === "Pending" ? "bg-amber-500" : "bg-rose-500"
                               }`} />
                               {tx.status === "Successful" ? "Completed" : tx.status}
-                            </span>
+                            </Badge>
                           </td>
 
                           <td className="py-4 text-center font-extrabold text-rose-400">
@@ -425,8 +432,11 @@ export default function PaymentHistoryPage() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={7} className="py-12 text-center text-rose-400 font-semibold text-sm">
-                        No transactions found matching the selected filters.
+                      <td colSpan={7} className="py-12">
+                        <EmptyState
+                          title="No transactions found"
+                          description="No transactions match the selected filters."
+                        />
                       </td>
                     </tr>
                   )}
@@ -439,7 +449,7 @@ export default function PaymentHistoryPage() {
                   <span className="text-xs font-semibold text-slate-400">Showing 1-{sortedTransactions.length} of {sortedTransactions.length} items</span>
                   <div className="flex items-center gap-1 text-xs font-bold text-slate-500">
                     <button className="px-2 py-1 rounded-lg hover:bg-slate-50 transition cursor-not-allowed text-slate-300">Prev</button>
-                    <button className="h-7 w-7 bg-[#135A3D] text-white rounded-lg flex items-center justify-center shadow-sm">1</button>
+                    <button className="h-7 w-7 bg-[#135A3D] text-white rounded-lg flex items-center justify-center">1</button>
                     <button className="px-2 py-1 rounded-lg hover:bg-slate-50 transition">Next</button>
                   </div>
                 </div>
@@ -497,13 +507,14 @@ export default function PaymentHistoryPage() {
                   })}
                 </div>
               ) : (
-                <div className="rounded-3xl border border-dashed border-slate-200 bg-white py-12 px-6 text-center text-slate-400 font-semibold text-sm">
-                  No transactions found matching the selected filters.
-                </div>
+                <EmptyState
+                  title="No transactions found"
+                  description="No transactions match the selected filters."
+                />
               )}
             </div>
 
-          </div>
+          </Card>
           {/* end card container */}
 
         </div>

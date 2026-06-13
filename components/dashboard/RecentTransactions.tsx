@@ -6,6 +6,8 @@ import { recentTransactions } from "@/src/data/mock";
 import { TransactionCard } from "./TransactionCard";
 import { RecentTransactionTable } from "./RecentTransactionTable";
 import { AnimatePresence } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export function RecentTransactions() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -45,7 +47,7 @@ export function RecentTransactions() {
         {/* Search History Input */}
         <div className="relative">
           <Receipt className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-          <input
+          <Input
             type="text"
             placeholder="Search history..."
             value={searchQuery}
@@ -74,9 +76,10 @@ export function RecentTransactions() {
             ))}
           </AnimatePresence>
         ) : (
-          <div className="rounded-[2rem] border border-dashed border-slate-200 bg-white p-8 text-center text-slate-400">
-            No transactions found matching "{searchQuery}"
-          </div>
+          <EmptyState
+            title="No transactions found"
+            description={`No transactions match "${searchQuery}".`}
+          />
         )}
       </div>
     </div>

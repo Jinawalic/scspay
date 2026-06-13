@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LoginForm } from "@/components/auth/login-form";
+import { Card } from "@/components/ui/card";
 
 export default function HomePage() {
   return (
@@ -22,9 +23,9 @@ export default function HomePage() {
         </div>
 
         {/* Bottom card containing the Login Form */}
-        <div className="flex-1 bg-white rounded-t-[2.5rem] px-6 py-8 shadow-[0_-12px_40px_rgba(0,0,0,0.12)] flex flex-col justify-between text-[#1E2E42] relative z-20">
+        <Card className="flex-1 bg-white rounded-t-[2.5rem] px-6 py-8 shadow-[0_-12px_40px_rgba(0,0,0,0.12)] flex flex-col justify-between text-[#1E2E42] relative z-20">
           <LoginForm layout="mobile" />
-        </div>
+        </Card>
       </div>
 
       {/* Desktop View: Keep original design */}
@@ -44,7 +45,7 @@ export default function HomePage() {
 
             {/* Right: Login card */}
             <div className="mx-auto w-full max-w-xl">
-              <section className="mx-auto w-full rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+              <Card className="mx-auto w-full rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
                 <div className="mb-6 space-y-3 text-center sm:text-left">
                   <div>
                     <h2 className="text-2xl font-semibold text-slate-950">Welcome Back</h2>
@@ -52,7 +53,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <LoginForm layout="desktop" />
-              </section>
+              </Card>
             </div>
           </div>
         </div>

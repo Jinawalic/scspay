@@ -2,7 +2,9 @@
 
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 // Confetti pieces config
 const confettiPieces = [
@@ -24,9 +26,12 @@ const confettiPieces = [
 ];
 
 export default function PaymentSuccessPage() {
+  const router = useRouter();
+
   return (
-    <main className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-0 sm:p-6 md:p-10">
-      <div className="w-full max-w-lg bg-white min-h-screen sm:min-h-0 sm:rounded-[2.5rem] border-none sm:border sm:border-slate-100 sm:shadow-[0_24px_70px_rgba(0,0,0,0.03)] flex flex-col justify-between overflow-hidden">
+    <main className="min-h-screen bg-[#F8FAFC] relative flex flex-col items-center justify-center p-0 sm:p-6 md:p-10">
+      <div className="pointer-events-none hidden md:block fixed inset-0 z-0 bg-slate-950/45 backdrop-blur-[2px]" />
+      <Card className="relative z-10 w-full max-w-lg bg-white min-h-screen sm:min-h-0 sm:rounded-[2.5rem] border-none sm:border sm:border-slate-100 md:max-w-[600px] md:max-h-[calc(100vh-5rem)] md:overflow-y-auto md:rounded-[2.75rem] md:border md:border-slate-100/80 flex flex-col justify-between overflow-hidden">
 
         {/* Top section: confetti + animation */}
         <div className="relative flex flex-col items-center pt-14 pb-6 px-6">
@@ -79,7 +84,7 @@ export default function PaymentSuccessPage() {
             />
             {/* Inner filled circle with check */}
             <div
-              className="relative flex items-center justify-center rounded-full shadow-md"
+              className="relative flex items-center justify-center rounded-full"
               style={{
                 width: 68,
                 height: 68,
@@ -120,7 +125,7 @@ export default function PaymentSuccessPage() {
           </p>
 
           {/* Details card */}
-          <div className="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden">
+          <div className="rounded-xl border border-slate-200 overflow-hidden hover:bg-white">
             {[
               { label: "Transaction ID", value: "SCSPAY-2026-0045", valueClass: "text-[#1E2E42]" },
               { label: "Date", value: "10 Jun 2026", valueClass: "text-[#1E2E42]" },
@@ -147,15 +152,16 @@ export default function PaymentSuccessPage() {
           transition={{ delay: 0.65, duration: 0.4, ease: "easeOut" }}
           className="px-6 pb-10 pt-2"
         >
-          <Link
-            href="/dashboard"
-            className="block w-full rounded-full bg-[#135A3D] py-4 text-center text-sm font-bold text-white shadow-md shadow-emerald-950/10 hover:bg-[#0E4E35] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+          <Button
+            type="button"
+            onClick={() => router.push("/dashboard")}
+            className="w-full bg-[#135A3D] py-4 text-center text-sm font-bold text-white transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
           >
             Back Home
-          </Link>
+          </Button>
         </motion.div>
 
-      </div>
+      </Card>
     </main>
   );
 }
