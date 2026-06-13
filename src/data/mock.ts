@@ -150,6 +150,7 @@ export const recentTransactions: Transaction[] = [
 ];
 
 export const studentProfile: StudentProfile = {
+  role: "student",
   fullName: "Jinawa Titus",
   email: "jinawatitus@gmail.com",
   matricNumber: "FT2002019",
