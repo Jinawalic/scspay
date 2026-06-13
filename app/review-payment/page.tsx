@@ -32,13 +32,13 @@ function ReviewPaymentContent() {
   const paymentDetails = category
     ? {
       title: category.name,
-      selectedItem: `${category.name} - 100L`,
+      selectedItem: `${category.name}`,
       amount: category.amount,
     }
     : {
-      title: "NACOS Dues",
-      selectedItem: "NACOS Dues - 100L",
-      amount: 1500,
+      title: "SCS Dues",
+      selectedItem: "SCS Dues",
+      amount: 3000,
     };
 
   const [error, setError] = useState<string | null>(null);

@@ -70,40 +70,12 @@ export const faculties = [
 
 export const paymentCategories: PaymentCategory[] = [
   {
-    id: "school-fees",
-    name: "School Fees",
+    id: "course-fees",
+    name: "Course Reg. Fees",
     description: "Semester tuition and academic charges.",
     amount: 220000,
     color: "from-emerald-600 to-green-400",
-  },
-  {
-    id: "acceptance-fees",
-    name: "Acceptance Fees",
-    description: "One-time admission processing fee.",
-    amount: 55000,
-    color: "from-sky-600 to-cyan-400",
-  },
-  {
-    id: "hostel-fees",
-    name: "Hostel Fees",
-    description: "Residential accommodation for the session.",
-    amount: 125000,
-    color: "from-violet-600 to-fuchsia-400",
-  },
-  {
-    id: "ict-fees",
-    name: "ICT Fees",
-    description: "Campus internet and digital services.",
-    amount: 32000,
-    color: "from-orange-500 to-amber-400",
-  },
-  {
-    id: "departmental-fees",
-    name: "Departmental Fees",
-    description: "Course-specific practical and lab charges.",
-    amount: 42000,
-    color: "from-slate-700 to-slate-500",
-  },
+  }
 ];
 
 export const recentTransactions: Transaction[] = [

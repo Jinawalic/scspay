@@ -66,8 +66,8 @@ export function RecentTransactionTable({
                   
                   {/* Status Column */}
                   <td className="px-6 py-3 ">
-                    <span className="inline-flex items-center justify-center px-4 py-1.5 text-xs font-medium rounded-full bg-[#00B955] text-white tracking-wide min-w-[95px]">
-                      {transaction.status === "Successful" ? "Completed" : transaction.status}
+                    <span className="inline-flex items-center justify-center px-4 py-1.5 text-xs font-medium rounded-full bg-emerald-700 text-white tracking-wide min-w-[95px]">
+                      {transaction.status === "Successful" ? "success" : transaction.status}
                     </span>
                   </td>
                   

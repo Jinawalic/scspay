@@ -14,10 +14,10 @@ export function DesktopSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed z-40 hidden w-64 h-full bg-slate-900 p-6 lg:block">
+    <aside className="fixed z-40 hidden w-64 h-full bg-white p-6 lg:block border-r border-slate-200">
       {/* Logo/Brand */}
       <div className="mb-10">
-        <h1 className="text-2xl font-bold text-white">SCSPay</h1>
+        <h1 className="text-2xl font-bold text-slate-800">MyPay</h1>
         <p className="mt-1 text-sm text-slate-400">Payment System</p>
       </div>
 
@@ -32,8 +32,8 @@ export function DesktopSidebar() {
               href={item.href}
               className={`flex items-center gap-3 rounded-2xl px-4 py-3 transition-all ${
                 isActive
-                  ? "bg-blue-600 text-white shadow-lg"
-                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                  ? "bg-emerald-800 text-white"
+                  : "text-slate-700 hover:bg-slate-200 hover:text-white"
               }`}
             >
               <Icon className="h-5 w-5" />
@@ -45,7 +45,7 @@ export function DesktopSidebar() {
 
       {/* User Info at Bottom */}
       <div className="absolute bottom-18 left-6 right-6">
-        <button className="flex items-center gap-3 rounded-2xl px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white">
+        <button className="flex items-center gap-3 rounded-2xl px-4 py-3 text-slate-400 hover:bg-slate-200 hover:text-white">
           <LogOutIcon className="h-5 w-5" />
           <span className="font-medium">Log Out</span>
         </button>
