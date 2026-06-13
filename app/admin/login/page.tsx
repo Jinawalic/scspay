@@ -181,7 +181,7 @@ export default function AdminLoginPage() {
             <button 
               type="button"
               disabled={isLoading}
-              className="flex items-center justify-center h-10 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-slate-200 transition group active:scale-95 disabled:opacity-40 disabled:active:scale-100"
+              className="flex items-center justify-center h-10 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-slate-200 transition group active:scale-95 disabled:opacity-40"
             >
               <Image
                 src="/images/google-icon.png"

@@ -132,7 +132,7 @@ export default function StudentLoginPage() {
             </button>
           </div>
 
-          {/* The Main GREEN Branding Action Button with Spinner */}
+          {/* The Main GREEN Branding Action Button with Inline Spinner */}
           <button
             type="submit"
             disabled={isLoading}
