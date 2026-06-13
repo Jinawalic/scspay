@@ -12,7 +12,8 @@ import {
   Lock,
   Eye,
   EyeOff,
-  Camera
+  Camera,
+  LogOut
 } from "lucide-react";
 import { studentProfile } from "@/src/data/mock";
 import { MobileBottomNav } from "@/components/dashboard/mobile-bottom-nav";
@@ -55,10 +56,17 @@ export default function ProfilePage() {
               </Link>
               <h1 className="text-xl font-bold text-slate-900">My Profile</h1>
             </div>
+            
             <div className="flex items-center gap-2">
-              <Button variant="secondary" className="px-4 py-2 text-xs text-slate-700">
-                View Activity
-              </Button>
+              {/* Mobile-Only Logout Button (Replaced View Activity slot on mobile, hidden on desktop) */}
+              <button
+                type="button"
+                onClick={() => router.push("/")}
+                className="flex h-9 px-3 items-center justify-center gap-1.5 rounded-xl border border-rose-100 bg-rose-50 text-rose-600 hover:bg-rose-100 active:scale-95 transition text-xs font-bold md:hidden"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </button>
             </div>
           </div>
 

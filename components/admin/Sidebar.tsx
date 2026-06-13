@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { 
   LayoutDashboard, 
   Users, 
@@ -10,7 +10,8 @@ import {
   PlusCircle, 
   Settings, 
   HelpCircle,
-  ChevronRight
+  ChevronRight,
+  LogOut
 } from "lucide-react";
 
 interface SidebarProps {
@@ -19,6 +20,7 @@ interface SidebarProps {
 
 export function Sidebar({ activeSegment }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
   const mainNav = [
     { name: "Dashboard", icon: LayoutDashboard, path: "/admin/dashboard" },
@@ -84,6 +86,16 @@ export function Sidebar({ activeSegment }: SidebarProps) {
               </Link>
             );
           })}
+
+          {/* Secure Admin Logout Trigger Component */}
+        <button
+          type="button"
+          onClick={() => router.push("/admin/login")}
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50/60 transition duration-150 group border border-transparent active:scale-95"
+        >
+          <LogOut className="h-4.5 w-4.5 text-slate-400 group-hover:text-rose-500 transition-colors stroke-[2]" />
+          <span>Logout</span>
+        </button>
         </nav>
       </div>
 
