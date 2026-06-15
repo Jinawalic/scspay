@@ -14,6 +14,17 @@ export function DesktopSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/students/logout", { method: "POST" });
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      console.error("Logout failed", error);
+      router.push("/");
+    }
+  };
+
   return (
     <aside className="fixed z-40 hidden w-64 h-full bg-white p-6 lg:block border-r border-slate-200">
       {/* Brand Logo Wrapper */}
@@ -54,7 +65,7 @@ export function DesktopSidebar() {
       <div className="absolute bottom-8 left-6 right-6">
         <button 
           type="button"
-          onClick={() => router.push("/")}
+          onClick={handleLogout}
           className="w-full flex items-center gap-3 rounded-2xl px-4 py-3 text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition-all active:scale-95"
         >
           <LogOutIcon className="h-5 w-5" />

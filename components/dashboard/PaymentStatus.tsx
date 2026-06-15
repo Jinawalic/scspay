@@ -1,4 +1,4 @@
-export function PaymentStatus() {
+export function PaymentStatus({ hasPending }: { hasPending: boolean }) {
   return (
     <div className="flex items-center justify-between rounded-xl border border-slate-200 px-6 py-4 hover:bg-white transition-colors">
       {/* Payment Status Text */}
@@ -9,9 +9,13 @@ export function PaymentStatus() {
         <p className="mt-1 text-lg font-semibold text-slate-900">Today</p>
       </div>
 
-      {/* Pending Pill */}
+      {/* Dynamic Status Pill */}
       <div className="rounded-full bg-white px-6 py-2.5 border border-slate-200">
-        <p className="text-sm font-semibold text-orange-500">Pending</p>
+        {hasPending ? (
+          <p className="text-sm font-semibold text-orange-500">Pending</p>
+        ) : (
+          <p className="text-sm font-semibold text-emerald-600">Completed</p>
+        )}
       </div>
     </div>
   );

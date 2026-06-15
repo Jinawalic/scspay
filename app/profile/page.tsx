@@ -44,6 +44,17 @@ export default function ProfilePage() {
   const [student, setStudent] = useState<StudentSessionProfile>(emptyProfile);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/students/logout", { method: "POST" });
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      console.error("Logout failed", error);
+      router.push("/");
+    }
+  };
+
   // Password Input States
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -113,7 +124,7 @@ export default function ProfilePage() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => router.push("/")}
+                onClick={handleLogout}
                 className="flex h-9 px-3 items-center justify-center gap-1.5 rounded-xl border border-rose-100 bg-rose-50 text-rose-600 hover:bg-rose-100 active:scale-95 transition text-xs font-bold md:hidden"
               >
                 <LogOut className="h-4 w-4" />

@@ -166,8 +166,8 @@ export default function PaymentHistoryPage() {
     // 3. Desktop Search Box Input Filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      const matchQuery = 
-        tx.type.toLowerCase().includes(query) || 
+      const matchQuery =
+        tx.type.toLowerCase().includes(query) ||
         (tx.description && tx.description.toLowerCase().includes(query)) ||
         tx.receipt.toLowerCase().includes(query);
       if (!matchQuery) return false;
@@ -281,14 +281,6 @@ export default function PaymentHistoryPage() {
               <h1 className="text-xl font-bold text-slate-900">All Payments</h1>
               <p className="text-sm font-medium text-slate-500 mt-0.5">View all payment records.</p>
             </div>
-            <div className="flex items-center gap-3">
-              <Button variant="secondary" className="px-4 py-2 text-sm font-semibold">
-                Edit view
-              </Button>
-              <Button className="px-4 py-2 text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800">
-                Export data
-              </Button>
-            </div>
           </div>
 
           {/* ========================================== */}
@@ -298,7 +290,7 @@ export default function PaymentHistoryPage() {
 
             {/* Top Toolbar Level with Header Actions & Filters */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-              
+
               {/* Header: Back navigation & Title */}
               {/* FIXED ON MOBILE: Reset justify positioning to default left alignment */}
               <div className="flex items-center gap-1 justify-start">
@@ -316,13 +308,13 @@ export default function PaymentHistoryPage() {
 
               {/* Filters Actions Bar */}
               <div className="flex items-center justify-center md:justify-end gap-3 w-full md:w-auto">
-                
+
                 {/* Desktop Embedded Layout Search Bar */}
                 <div className="hidden md:relative md:block w-64">
                   <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <Input 
-                    type="text" 
-                    placeholder="Search transaction..." 
+                  <Input
+                    type="text"
+                    placeholder="Search transaction..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full rounded-xl border border-slate-200 py-2 pl-10 pr-4 text-xs font-semibold text-slate-800 outline-none placeholder:text-slate-400 focus:border-slate-300 transition-all"
@@ -432,10 +424,10 @@ export default function PaymentHistoryPage() {
                       </td>
                     </tr>
                   ) : sortedTransactions.length > 0 ? (
-                    sortedTransactions.map((tx) => {
+                    sortedTransactions.map((tx, idx) => {
                       return (
                         <tr key={tx.id} className="hover:bg-slate-50/60 transition-colors group">
-                          <td className="py-4 px-4">{tx.id.slice(0, 6).toUpperCase()}</td>
+                          <td className="py-4 px-4 font-bold text-slate-400">{idx + 1}</td>
 
                           <td className="py-4 px-4">
                             <div className="flex items-center gap-3">
@@ -451,17 +443,15 @@ export default function PaymentHistoryPage() {
 
                           <td className="py-4">
                             <Badge
-                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold leading-none ${
-                                tx.status === "Successful"
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold leading-none ${tx.status === "Successful"
                                   ? "bg-emerald-50 text-emerald-700"
                                   : tx.status === "Pending"
-                                  ? "bg-amber-50 text-amber-700"
-                                  : "bg-rose-50 text-rose-700"
-                              }`}
+                                    ? "bg-amber-50 text-amber-700"
+                                    : "bg-rose-50 text-rose-700"
+                                }`}
                             >
-                              <span className={`h-1 w-1 rounded-full ${
-                                tx.status === "Successful" ? "bg-emerald-500" : tx.status === "Pending" ? "bg-amber-500" : "bg-rose-500"
-                              }`} />
+                              <span className={`h-1 w-1 rounded-full ${tx.status === "Successful" ? "bg-emerald-500" : tx.status === "Pending" ? "bg-amber-500" : "bg-rose-500"
+                                }`} />
                               {tx.status === "Successful" ? "Completed" : tx.status}
                             </Badge>
                           </td>
@@ -471,7 +461,7 @@ export default function PaymentHistoryPage() {
                           </td>
 
                           <td className="py-4 text-center">
-                            <button 
+                            <button
                               onClick={() => handleTransactionClick(tx.receipt)}
                               className="h-8 w-8 inline-flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-700 transition"
                             >
@@ -527,9 +517,8 @@ export default function PaymentHistoryPage() {
                       <div
                         key={tx.id}
                         onClick={() => handleTransactionClick(tx.receipt)}
-                        className={`flex items-center justify-between py-4 cursor-pointer hover:bg-slate-50/70 px-2 rounded-2xl -mx-2 transition active:scale-[0.99] ${
-                          idx !== arr.length - 1 ? "border-b border-slate-100/70" : ""
-                        }`}
+                        className={`flex items-center justify-between py-4 cursor-pointer hover:bg-slate-50/70 px-2 rounded-2xl -mx-2 transition active:scale-[0.99] ${idx !== arr.length - 1 ? "border-b border-slate-100/70" : ""
+                          }`}
                       >
                         {/* Left Section: Icon and Details */}
                         <div className="flex items-center gap-4 flex-1 min-w-0">
