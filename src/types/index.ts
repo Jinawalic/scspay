@@ -28,3 +28,17 @@ export type StudentProfile = {
   phone: string;
   completed: boolean;
 };
+
+export type StudentSessionProfile = {
+  id: string;
+  kind: "STUDENT";
+  role: string;
+  fullName: string;
+  email: string | null;
+  matricNumber: string | null;
+  faculty: string | null;
+  department: string | null;
+  level: string | null;
+  phone: string | null;
+  completed: boolean;
+};

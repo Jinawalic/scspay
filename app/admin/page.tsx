@@ -39,7 +39,6 @@ export default function AdminLoginPage() {
         src="/images/logo.png"
         alt="Cloudy blue sky background"
         fill
-        priority
         className="object-contain object-center z-0"
       />
 

@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserKind {
+  STUDENT
+  ADMIN
+}
+
+enum PaymentStatus {
+  Successful
+  Pending
+  Failed
+}
+
+model Faculty {
+  id           String       @id @default(cuid())
+  slug         String       @unique
+  name         String       @unique
+  departments  Department[]
+  students     User[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Department {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  slug        String    @unique
+  name        String
+  facultyId   String
+  faculty     Faculty   @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  students    User[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([facultyId, name])
+  @@index([facultyId])
+}
+
+model User {
+  id             String        @id @default(cuid())
+  kind           UserKind      @default(STUDENT)
+  role           String?
+  fullName       String
+  email          String?       @unique
+  matricNumber   String?       @unique
+  passwordHash   String?
+  phone          String?
+  level          String?
+  completed      Boolean       @default(false)
+  facultyId      String?
+  faculty        Faculty?      @relation(fields: [facultyId], references: [id], onDelete: SetNull)
+  departmentId   String?
+  department     Department?   @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  transactions   PaymentTransaction[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([kind])
+  @@index([facultyId])
+  @@index([departmentId])
+}
+
+model FeeItem {
+  id          String               @id @default(cuid())
+  slug        String               @unique
+  name        String
+  description String?
+  amount      Int
+  color       String?
+  session     String?
+  isActive    Boolean              @default(true)
+  transactions PaymentTransaction[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+}
+
+model AdminAccount {
+  id           String   @id @default(cuid())
+  username     String?  @unique
+  email        String?  @unique
+  fullName     String?
+  passwordHash String
+  role         String   @default("ADMIN")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model PaymentTransaction {
+  id              String        @id @default(cuid())
+  receipt         String        @unique
+  reference       String?       @unique
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feeItemId       String?
+  feeItem         FeeItem?      @relation(fields: [feeItemId], references: [id], onDelete: SetNull)
+  type            String
+  amount          Int
+  status          PaymentStatus
+  session         String
+  description     String?
+  provider        String        @default("paystack")
+  metadata        Json?
+  paidAt          DateTime      @default(now())
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([feeItemId])
+  @@index([status])
+  @@index([session])
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { PlusCircle, SlidersHorizontal, ShieldCheck, AlertCircle, Edit2, Trash2 } from "lucide-react";
 import { AdminLayoutContainer } from "@/components/admin/AdminLayoutContainer";
 import { ModalShell } from "@/components/admin/ModalShell";
@@ -19,23 +19,22 @@ interface CreatedDepartmentItem {
   id: string;
   code: string;
   title: string;
-  faculty: string; // Updated from session to faculty
+  faculty: string;
 }
 
-const MOCK_CREATED_DEPARTMENTS: CreatedDepartmentItem[] = [
-  { id: "1", code: "CMP", title: "Computer Science", faculty: "Faculty of Science" },
-  { id: "2", code: "MTH", title: "Mathematics & Statistics", faculty: "Faculty of Science" },
-  { id: "3", code: "PHY", title: "Physics with Electronics", faculty: "Faculty of Science" },
-  { id: "4", code: "CHM", title: "Pure and Applied Chemistry", faculty: "Faculty of Science" },
-];
+type DepartmentApiResponse = {
+  departments: CreatedDepartmentItem[];
+};
 
 export default function CreateDepartmentPage() {
-  const [departmentRecords, setDepartmentRecords] = useState<CreatedDepartmentItem[]>(MOCK_CREATED_DEPARTMENTS);
+  const [departmentRecords, setDepartmentRecords] = useState<CreatedDepartmentItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoadingRecords, setIsLoadingRecords] = useState(true);
 
   // Create Modal Interactivity States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ title: "", code: "", faculty: "" });
+  const [isSaving, setIsSaving] = useState(false);
 
   // Edit Modular Interactivity Pipeline States
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -54,6 +53,39 @@ export default function CreateDepartmentPage() {
     setIsToastOpen(true);
   };
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadDepartments = async () => {
+      try {
+        const response = await fetch("/api/admin/departments");
+        const payload = (await response.json().catch(() => ({}))) as DepartmentApiResponse & { error?: string };
+
+        if (!response.ok) {
+          throw new Error(payload?.error || "Unable to load departments");
+        }
+
+        if (isMounted) {
+          setDepartmentRecords(payload.departments ?? []);
+        }
+      } catch {
+        if (isMounted) {
+          triggerToast("Unable to load department records right now.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingRecords(false);
+        }
+      }
+    };
+
+    void loadDepartments();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const filteredRecords = departmentRecords.filter((rec) =>
     rec.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     rec.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -62,21 +94,44 @@ export default function CreateDepartmentPage() {
   );
 
   // Form Creation Core Handlers
-  const handleCreateDepartment = (e: React.FormEvent) => {
+  const handleCreateDepartment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.code || !formData.faculty) return;
 
-    const newRecord: CreatedDepartmentItem = {
-      id: String(departmentRecords.length + 1),
-      code: formData.code.trim().toUpperCase(),
-      title: formData.title.trim(),
-      faculty: formData.faculty.trim(),
-    };
+    setIsSaving(true);
 
-    setDepartmentRecords([newRecord, ...departmentRecords]);
-    setIsModalOpen(false);
-    triggerToast(`Department of "${formData.title}" has been successfully initialized.`);
-    setFormData({ title: "", code: "", faculty: "" });
+    try {
+      const response = await fetch("/api/admin/departments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload?.error || "Unable to create department");
+      }
+
+      const createdDepartment = payload.department as CreatedDepartmentItem | undefined;
+      if (createdDepartment) {
+        setDepartmentRecords((prev) => {
+          const next = prev.filter((item) => item.id !== createdDepartment.id);
+          return [createdDepartment, ...next];
+        });
+      }
+
+      setIsModalOpen(false);
+      triggerToast(payload?.message || `Department of "${formData.title}" has been successfully initialized.`);
+      setFormData({ title: "", code: "", faculty: "" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to create department";
+      triggerToast(message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Dedicated Pipeline Save Callback Function Engine 
@@ -161,11 +216,17 @@ export default function CreateDepartmentPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-[14px] font-semibold text-slate-700">
-                {filteredRecords.length > 0 ? (
-                  filteredRecords.map((item) => (
+                {isLoadingRecords ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-12 font-medium text-slate-400">
+                      Loading departmental records...
+                    </td>
+                  </tr>
+                ) : filteredRecords.length > 0 ? (
+                  filteredRecords.map((item, index) => (
                     <tr key={item.id} className="hover:bg-slate-50/40 transition-colors group">
                       <td className="py-4 px-5 font-bold text-slate-900 tracking-wide">
-                        {item.id}
+                        {index + 1}
                       </td>
                       <td className="py-4 px-5">
                         <span className="px-2.5 py-1 text-[11px] font-extrabold tracking-wider bg-slate-100 text-slate-800 rounded-lg uppercase">
@@ -296,8 +357,9 @@ export default function CreateDepartmentPage() {
               <Button 
                 variant="default" 
                 type="submit"
+                disabled={isSaving}
               >
-                Publish Department
+                {isSaving ? "Publishing..." : "Publish Department"}
               </Button>
             </div>
           </form>

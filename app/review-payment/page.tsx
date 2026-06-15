@@ -1,27 +1,45 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ChevronLeft, X } from "lucide-react";
-import { paymentCategories } from "@/src/data/mock";
 import { PaymentSummary } from "@/components/payment/payment-summary";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
+import { toPaymentCategory } from "@/src/lib/payment-items";
+import type { PaymentCategory } from "@/src/types";
+
+type PaymentApiRecord = {
+  id: string;
+  title: string;
+  description?: string | null;
+  amount: number;
+};
+
+const FALLBACK_PAYMENT: PaymentCategory = {
+  id: "default-payment",
+  name: "SCS Dues",
+  description: "Configured by admin",
+  amount: 3000,
+  color: "from-emerald-600 to-green-400",
+};
 
 export default function ReviewPaymentPage() {
   return (
-    <Suspense fallback={
-      <main className="min-h-screen bg-[#F8FAFC] relative flex flex-col items-center justify-center p-0 sm:p-6 md:p-10">
-        <div className="pointer-events-none hidden md:block fixed inset-0 z-0 bg-slate-950/45 backdrop-blur-[2px]" />
-        <Card className="relative z-10 w-full max-w-lg bg-white min-h-screen sm:min-h-0 sm:rounded-[2.5rem] border-none sm:border sm:border-slate-100 sm:shadow-[0_24px_70px_rgba(0,0,0,0.03)] md:max-w-[660px] md:max-h-[calc(100vh-5rem)] md:overflow-y-auto md:rounded-[2.75rem] md:border md:border-slate-100/80 md:shadow-[0_40px_120px_rgba(15,23,42,0.22)] p-6 sm:p-10 flex flex-col justify-center items-center gap-3">
-          <LoadingSkeleton className="h-4 w-40 rounded-full" />
-          <p className="text-sm text-slate-500 font-semibold">Loading payment details...</p>
-        </Card>
-      </main>
-    }>
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#F8FAFC] relative flex flex-col items-center justify-center p-0 sm:p-6 md:p-10">
+          <div className="pointer-events-none hidden md:block fixed inset-0 z-0 bg-slate-950/45 backdrop-blur-[2px]" />
+          <Card className="relative z-10 w-full max-w-lg bg-white min-h-screen sm:min-h-0 sm:rounded-[2.5rem] border-none sm:border sm:border-slate-100 sm:shadow-[0_24px_70px_rgba(0,0,0,0.03)] md:max-w-[660px] md:max-h-[calc(100vh-5rem)] md:overflow-y-auto md:rounded-[2.75rem] md:border md:border-slate-100/80 md:shadow-[0_40px_120px_rgba(15,23,42,0.22)] p-6 sm:p-10 flex flex-col justify-center items-center gap-3">
+            <LoadingSkeleton className="h-4 w-40 rounded-full" />
+            <p className="text-sm text-slate-500 font-semibold">Loading payment details...</p>
+          </Card>
+        </main>
+      }
+    >
       <ReviewPaymentContent />
     </Suspense>
   );
@@ -31,38 +49,72 @@ function ReviewPaymentContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentCategories, setPaymentCategories] = useState<PaymentCategory[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Find the selected category from the mock data, or default to NACOS Dues to match the design mockup exactly
-  const category = paymentCategories.find((c) => c.id === id);
+  useEffect(() => {
+    let isMounted = true;
 
-  const paymentDetails = category
-    ? {
-      title: category.name,
-      selectedItem: `${category.name}`,
-      amount: category.amount,
-    }
-    : {
-      title: "SCS Dues",
-      selectedItem: "SCS Dues",
-      amount: 3000,
+    const loadPayments = async () => {
+      try {
+        const res = await fetch("/api/admin/payments", {
+          cache: "no-store",
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error ?? "Unable to load payment details");
+        }
+
+        const categories = (data.payments ?? []).map((payment: PaymentApiRecord) =>
+          toPaymentCategory({
+            id: payment.id,
+            name: payment.title,
+            description: payment.description,
+            amount: payment.amount,
+          })
+        );
+
+        if (!isMounted) return;
+        setPaymentCategories(categories);
+      } catch (error) {
+        if (!isMounted) return;
+        setLoadError(error instanceof Error ? error.message : "Unable to load payment details");
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
     };
 
-  const [error, setError] = useState<string | null>(null);
+    loadPayments();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const paymentDetails = useMemo(() => {
+    if (!paymentCategories.length) {
+      return FALLBACK_PAYMENT;
+    }
+
+    return paymentCategories.find((category) => category.id === id) ?? paymentCategories[0];
+  }, [id, paymentCategories]);
 
   const handlePay = async () => {
     setIsProcessing(true);
-    setError(null);
     try {
       const res = await fetch("/api/paystack/initialize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          // Use a real student email in production; this uses the mock profile email
           email: "student@scspay.ng",
           amount: paymentDetails.amount,
           metadata: {
-            payment_type: paymentDetails.title,
-            selected_item: paymentDetails.selectedItem,
+            payment_type: paymentDetails.name,
+            selected_item: paymentDetails.name,
           },
         }),
       });
@@ -73,23 +125,32 @@ function ReviewPaymentContent() {
         throw new Error(data.error ?? "Failed to initialize payment");
       }
 
-      // Redirect browser to Paystack hosted checkout
       window.location.href = data.authorizationUrl;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "Something went wrong");
       setIsProcessing(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-[#F8FAFC] relative flex flex-col items-center justify-center p-0 sm:p-6 md:p-10">
+        <div className="pointer-events-none hidden md:block fixed inset-0 z-0 bg-slate-950/45 backdrop-blur-[2px]" />
+        <Card className="relative z-10 w-full max-w-lg bg-white min-h-screen sm:min-h-0 sm:rounded-[2.5rem] border-none sm:border sm:border-slate-100 sm:shadow-[0_24px_70px_rgba(0,0,0,0.03)] md:max-w-[660px] md:max-h-[calc(100vh-5rem)] md:overflow-y-auto md:rounded-[2.75rem] md:border md:border-slate-100/80 md:shadow-[0_40px_120px_rgba(15,23,42,0.22)] p-6 sm:p-10 flex flex-col justify-center items-center gap-3">
+          <LoadingSkeleton className="h-4 w-40 rounded-full" />
+          <p className="text-sm text-slate-500 font-semibold">Loading payment details...</p>
+        </Card>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#F8FAFC] relative flex flex-col items-center justify-center p-0 sm:p-6 md:p-10">
       <div className="pointer-events-none hidden md:block fixed inset-0 z-0 bg-slate-950/45 backdrop-blur-[2px]" />
       <Card className="relative z-10 w-full max-w-lg bg-white min-h-screen sm:min-h-0 sm:rounded-[2.5rem] border-none sm:border sm:border-slate-100 sm:shadow-[0_24px_70px_rgba(0,0,0,0.03)] md:max-w-[660px] md:max-h-[calc(100vh-5rem)] md:overflow-y-auto md:rounded-[2.75rem] md:border md:border-slate-100/80 md:shadow-[0_40px_120px_rgba(15,23,42,0.22)] p-6 sm:p-10 flex flex-col justify-start">
-
         <div className="space-y-3">
           {/* Header Navigation */}
           <div className="flex items-center justify-between">
-            {/* Back Button */}
             <Link
               href={id ? `/make-payment?id=${id}` : "/make-payment"}
               className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-100 bg-white text-[#1E2E42] shadow-sm transition hover:bg-slate-50 active:scale-95"
@@ -97,14 +158,12 @@ function ReviewPaymentContent() {
               <ChevronLeft className="h-4 w-4 stroke-[2.5]" />
             </Link>
 
-            {/* Step Indicators */}
             <div className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-[#135A3D]" />
               <span className="h-2 w-7 rounded-full bg-[#135A3D]" />
               <span className="h-2 w-2 rounded-full border border-slate-300 bg-white" />
             </div>
 
-            {/* Close Button */}
             <Link
               href="/dashboard"
               className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-100 bg-white text-[#1E2E42] shadow-sm transition hover:bg-slate-50 active:scale-95"
@@ -113,7 +172,6 @@ function ReviewPaymentContent() {
             </Link>
           </div>
 
-          {/* Title & Description */}
           <div className="text-left mt-2">
             <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#135A3D]">
               Step 2 of 3
@@ -126,15 +184,19 @@ function ReviewPaymentContent() {
             </p>
           </div>
 
-          {/* Payment Summary Component */}
+          {loadError && (
+            <p className="rounded-xl bg-red-50 px-4 py-3 text-xs font-semibold text-red-600 text-center">
+              {loadError}
+            </p>
+          )}
+
           <PaymentSummary
-            title={paymentDetails.title}
-            selectedItem={paymentDetails.selectedItem}
+            title={paymentDetails.name}
+            selectedItem={paymentDetails.name}
             total={paymentDetails.amount}
             method="Paystack"
           />
 
-          {/* Payment Method Card */}
           <div className="flex items-center justify-between rounded-2xl border border-slate-100/80 bg-white p-2 shadow-[0_4px_12px_rgba(0,0,0,0.01)] text-left">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
@@ -150,31 +212,22 @@ function ReviewPaymentContent() {
           </div>
         </div>
 
-        {/* Error message */}
-        {error && (
-          <p className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-xs font-semibold text-red-600 text-center">
-            {error}
-          </p>
-        )}
-
-        {/* Pay Now Button */}
         <div className="mt-6">
-            <Button
-              type="button"
-              onClick={handlePay}
-              disabled={isProcessing}
+          <Button
+            type="button"
+            onClick={handlePay}
+            disabled={isProcessing}
             className="w-full bg-[#135A3D] py-4 text-center text-sm font-bold text-white shadow-md shadow-emerald-950/10 hover:bg-[#0E4E35] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
-            >
-              {isProcessing && (
-                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                </svg>
-              )}
-              {isProcessing ? "Redirecting to Paystack..." : "Pay Now"}
-            </Button>
+          >
+            {isProcessing && (
+              <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+              </svg>
+            )}
+            {isProcessing ? "Redirecting to Paystack..." : "Pay Now"}
+          </Button>
         </div>
-
       </Card>
     </main>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -15,7 +15,7 @@ import {
   Camera,
   LogOut
 } from "lucide-react";
-import { studentProfile } from "@/src/data/mock";
+
 import { MobileBottomNav } from "@/components/dashboard/mobile-bottom-nav";
 import { DesktopSidebar } from "@/components/dashboard/DesktopSidebar";
 import { Button } from "@/components/ui/button";
@@ -23,9 +23,26 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import type { StudentSessionProfile } from "@/src/types";
+
+const emptyProfile: StudentSessionProfile = {
+  id: "",
+  kind: "STUDENT",
+  role: "Student",
+  fullName: "",
+  email: null,
+  matricNumber: null,
+  faculty: null,
+  department: null,
+  level: null,
+  phone: null,
+  completed: false,
+};
 
 export default function ProfilePage() {
   const router = useRouter();
+  const [student, setStudent] = useState<StudentSessionProfile>(emptyProfile);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
   // Password Input States
   const [currentPassword, setCurrentPassword] = useState("");
@@ -37,15 +54,51 @@ export default function ProfilePage() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadStudent = async () => {
+      try {
+        const response = await fetch("/api/students/me");
+
+        if (response.status === 401) {
+          router.replace("/");
+          return;
+        }
+
+        const payload = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(payload?.error || "Unable to load your profile");
+        }
+
+        if (isMounted && payload.student) {
+          setStudent(payload.student as StudentSessionProfile);
+        }
+      } catch {
+        if (isMounted) {
+          setStudent(emptyProfile);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingProfile(false);
+        }
+      }
+    };
+
+    void loadStudent();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
+
   return (
     <main className="min-h-screen bg-[#F8FAFC]">
       <DesktopSidebar />
 
       <div className="lg:ml-64">
-        {/* Core Layout Structure Wrapper */}
         <div className="px-4 sm:px-6 lg:px-8 py-6 max-w-5xl mx-auto space-y-2 pb-24 lg:pb-8">
-          
-          {/* Top Title/Navigation Header Bar */}
           <div className="flex items-center justify-between border-b border-slate-100 pb-2">
             <div className="flex items-center gap-3">
               <Link
@@ -56,9 +109,8 @@ export default function ProfilePage() {
               </Link>
               <h1 className="text-xl font-bold text-slate-900">My Profile</h1>
             </div>
-            
+
             <div className="flex items-center gap-2">
-              {/* Mobile-Only Logout Button (Replaced View Activity slot on mobile, hidden on desktop) */}
               <button
                 type="button"
                 onClick={() => router.push("/")}
@@ -70,9 +122,6 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* ========================================== */}
-          {/* PROFILE AVATAR BLOCK CARD                  */}
-          {/* ========================================== */}
           <Card className="w-full rounded-xl border border-slate-200 p-6 flex flex-col sm:flex-row items-center gap-6 hover:bg-white transition">
             <div className="relative group cursor-pointer">
               <Avatar className="h-15 w-15 bg-[#EAF5F0] text-[#135A3D] overflow-hidden">
@@ -85,17 +134,14 @@ export default function ProfilePage() {
 
             <div className="text-center sm:text-left space-y-1 flex-1">
               <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-                {studentProfile.fullName || "Natashia Khaleira"}
+                {isLoadingProfile ? "Loading profile..." : student.fullName || "Student"}
               </h2>
               <Badge className="text-xs font-bold text-[#135A3D] uppercase tracking-wider bg-[#EAF5F0] inline-block px-2.5 py-0.5 rounded-md">
-                {studentProfile.role || "Student"}
+                {student.role || "Student"}
               </Badge>
             </div>
           </Card>
 
-          {/* ========================================== */}
-          {/* PERSONAL INFORMATION CARD BLOCK            */}
-          {/* ========================================== */}
           <Card className="w-full rounded-xl border border-slate-200 p-6 space-y-2 hover:bg-white transition">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-sm font-bold text-slate-800 tracking-tight uppercase tracking-wider">
@@ -106,14 +152,13 @@ export default function ProfilePage() {
               </Button>
             </div>
 
-            {/* Responsive Balanced Grid Data Columns */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-8">
               <div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">
                   Matriculation Number
                 </span>
                 <div className="text-sm font-bold text-slate-800 break-words">
-                  {studentProfile.matricNumber || "NCS/2022/0048"}
+                  {student.matricNumber || "Matric number not set"}
                 </div>
               </div>
 
@@ -122,7 +167,7 @@ export default function ProfilePage() {
                   Department
                 </span>
                 <div className="text-sm font-bold text-slate-800 break-words">
-                  {studentProfile.department || "Computer Science"}
+                  {student.department || "Department not set"}
                 </div>
               </div>
 
@@ -132,7 +177,7 @@ export default function ProfilePage() {
                 </span>
                 <div className="text-sm font-bold text-slate-800 break-words flex items-center gap-1.5">
                   <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                  {studentProfile.email || "info@binary-fusion.com"}
+                  {student.email || "Email not set"}
                 </div>
               </div>
 
@@ -142,7 +187,7 @@ export default function ProfilePage() {
                 </span>
                 <div className="text-sm font-bold text-slate-800 break-words flex items-center gap-1.5">
                   <Phone className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                  {studentProfile.phone ? `+234 ${studentProfile.phone}` : "(+234) 812-554-5846"}
+                  {student.phone || "Phone not set"}
                 </div>
               </div>
 
@@ -158,9 +203,6 @@ export default function ProfilePage() {
             </div>
           </Card>
 
-          {/* ========================================== */}
-          {/* PASSWORD UPDATE INTERACTIVE SECTION        */}
-          {/* ========================================== */}
           <Card className="w-full rounded-xl border border-slate-200 p-6 space-y-2 hover:bg-white">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-sm font-bold text-slate-800 tracking-tight uppercase tracking-wider">
@@ -171,10 +213,7 @@ export default function ProfilePage() {
               </Button>
             </div>
 
-            {/* Inputs responsive stack to full wide dynamic row layout */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-              
-              {/* Current Password Field */}
               <div className="space-y-1.5 w-full">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
                   Current Password
@@ -198,7 +237,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* New Password Field */}
               <div className="space-y-1.5 w-full">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
                   New Password
@@ -222,7 +260,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Confirm Password Field */}
               <div className="space-y-1.5 w-full">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
                   Confirm Password
@@ -245,10 +282,8 @@ export default function ProfilePage() {
                   </button>
                 </div>
               </div>
-
             </div>
           </Card>
-
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import type { PaymentCategory, Transaction, StudentProfile } from "@/src/types";
+import type { Transaction, StudentProfile } from "@/src/types";
 
 export const faculties = [
   {
@@ -66,16 +66,6 @@ export const faculties = [
       "Theatre Arts",
     ],
   },
-];
-
-export const paymentCategories: PaymentCategory[] = [
-  {
-    id: "course-fees",
-    name: "Course Reg. Fees",
-    description: "Semester tuition and academic charges.",
-    amount: 220000,
-    color: "from-emerald-600 to-green-400",
-  }
 ];
 
 export const recentTransactions: Transaction[] = [

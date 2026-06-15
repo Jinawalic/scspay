@@ -1,7 +1,6 @@
 import { Bell, UserCircle } from "lucide-react";
-import { studentProfile } from "@/src/data/mock";
 
-export function DashboardHeader() {
+export function DashboardHeader({ studentName = "Student" }: { studentName?: string }) {
   return (
     <div className="flex items-center justify-between">
       {/* User Avatar and Greeting */}
@@ -9,7 +8,7 @@ export function DashboardHeader() {
         <UserCircle className="h-8 w-8 text-[#135A3D]" />
         <div>
           <h1 className="text-xl font-semibold text-slate-900">
-            Hi, {studentProfile.fullName}
+            Hi, {studentName}
           </h1>
         </div>
       </div>

@@ -1,20 +1,22 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
 import { Lock, Mail, User, FileText, Eye, EyeOff, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ToastNotification } from "@/components/admin/ToastNotification";
 
-const stepOneSchema = z.object({
+const stepOneBaseSchema = z.object({
   email: z.string().email("Enter a valid email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string().min(8, "Confirm your password"),
-}).refine((data) => data.password === data.confirmPassword, {
+});
+
+const stepOneSchema = stepOneBaseSchema.refine((data) => data.password === data.confirmPassword, {
   message: "Passwords must match",
   path: ["confirmPassword"],
 });
@@ -23,6 +25,19 @@ const stepTwoSchema = z.object({
   fullName: z.string().min(3, "Enter your full name"),
   matricNumber: z.string().min(5, "Enter your matric number"),
 });
+
+const fullRegistrationSchema = z
+  .object({
+    email: stepOneBaseSchema.shape.email,
+    password: stepOneBaseSchema.shape.password,
+    confirmPassword: stepOneBaseSchema.shape.confirmPassword,
+    fullName: stepTwoSchema.shape.fullName,
+    matricNumber: stepTwoSchema.shape.matricNumber,
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords must match",
+    path: ["confirmPassword"],
+  });
 
 type StepOneValues = z.infer<typeof stepOneSchema>;
 type StepTwoValues = z.infer<typeof stepTwoSchema>;
@@ -34,16 +49,22 @@ export function RegisterForm({ layout = "desktop" }: { layout?: "desktop" | "mob
   const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const resolver = (step === 1 ? zodResolver(stepOneSchema) : zodResolver(stepTwoSchema)) as any;
+  const [submitError, setSubmitError] = useState("");
+  const [isSuccessToastOpen, setIsSuccessToastOpen] = useState(false);
+  const [successToastMessage, setSuccessToastMessage] = useState("");
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const redirectTimerRef = useRef<number | null>(null);
   const {
     register,
     handleSubmit,
+    getValues,
     setValue,
+    setError,
+    clearErrors,
     watch,
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormValues>({
     mode: "onTouched",
-    resolver,
     defaultValues: {
       email: "",
       password: "",
@@ -53,13 +74,73 @@ export function RegisterForm({ layout = "desktop" }: { layout?: "desktop" | "mob
     },
   });
 
+  useEffect(() => {
+    return () => {
+      if (redirectTimerRef.current) {
+        window.clearTimeout(redirectTimerRef.current);
+      }
+    };
+  }, []);
+
+  const applySchemaErrors = (result: any) => {
+    result.error.issues.forEach((issue: { path: Array<string | number>; message: string }) => {
+      const field = issue.path[0];
+      if (field === "email" || field === "password" || field === "confirmPassword" || field === "fullName" || field === "matricNumber") {
+        setError(field, { type: "manual", message: issue.message });
+      }
+    });
+  };
+
   const onSubmit = async (data: StepOneValues & StepTwoValues) => {
     if (step === 1) {
+      const result = stepOneSchema.safeParse(getValues());
+      clearErrors();
+
+      if (!result.success) {
+        applySchemaErrors(result);
+        return;
+      }
+
       setStep(2);
       return;
     }
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    router.push("/dashboard");
+
+    setSubmitError("");
+    clearErrors();
+
+    const validation = fullRegistrationSchema.safeParse(getValues());
+
+    if (!validation.success) {
+      applySchemaErrors(validation);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/students/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(validation.data),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload?.error || "Unable to create your account right now");
+      }
+
+      setSuccessToastMessage("Registration complete. Redirecting to your dashboard.");
+      setIsSuccessToastOpen(true);
+      setIsRedirecting(true);
+
+      redirectTimerRef.current = window.setTimeout(() => {
+        router.replace(payload.redirectTo ?? "/dashboard");
+      }, 1600);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to create your account right now";
+      setSubmitError(message);
+    }
   };
 
   if (layout === "mobile") {
@@ -240,10 +321,10 @@ export function RegisterForm({ layout = "desktop" }: { layout?: "desktop" | "mob
         <div className="pt-4 space-y-4">
           <Button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isRedirecting}
             className="w-full bg-[#135A3D] py-4 text-center text-sm font-bold text-white shadow-md shadow-emerald-950/10 hover:bg-[#0e4830] transition active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
           >
-            {isSubmitting ? (step === 1 ? "Continuing..." : "Registering...") : (step === 1 ? "Continue" : "Complete Registration")}
+            {isSubmitting || isRedirecting ? (step === 1 ? "Continuing..." : "Registering...") : (step === 1 ? "Continue" : "Complete Registration")}
           </Button>
 
           <div className="flex flex-col gap-3 items-center justify-center">
@@ -266,8 +347,21 @@ export function RegisterForm({ layout = "desktop" }: { layout?: "desktop" | "mob
                 Login
               </Link>
             </div>
+            {submitError && (
+              <p className="pt-1 text-center text-xs font-semibold text-rose-600">
+                {submitError}
+              </p>
+            )}
           </div>
         </div>
+
+        <ToastNotification
+          isOpen={isSuccessToastOpen}
+          message={successToastMessage}
+          type="success"
+          duration={1400}
+          onClose={() => setIsSuccessToastOpen(false)}
+        />
       </form>
     );
   }
@@ -299,7 +393,7 @@ export function RegisterForm({ layout = "desktop" }: { layout?: "desktop" | "mob
             {errors.confirmPassword && <p className="text-xs text-rose-600">{errors.confirmPassword.message}</p>}
           </div>
           <div className="flex items-center justify-between gap-4 text-sm text-slate-600">
-            <Button type="submit" className="w-full">Continue</Button>
+            <Button type="submit" className="w-full" disabled={isSubmitting || isRedirecting}>Continue</Button>
             <Button type="button" variant="ghost" className="w-full" onClick={() => router.push("/")}>Back to Login</Button>
           </div>
         </>
@@ -316,13 +410,22 @@ export function RegisterForm({ layout = "desktop" }: { layout?: "desktop" | "mob
             {errors.matricNumber && <p className="text-xs text-rose-600">{errors.matricNumber.message}</p>}
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button type="submit" className="w-full">Complete Registration</Button>
+            <Button type="submit" className="w-full" disabled={isSubmitting || isRedirecting}>Complete Registration</Button>
             <Button type="button" variant="outline" className="w-full" onClick={() => setStep(1)}>
               Back to Login
             </Button>
           </div>
+          {submitError && <p className="text-xs font-semibold text-rose-600">{submitError}</p>}
         </>
       )}
+
+      <ToastNotification
+        isOpen={isSuccessToastOpen}
+        message={successToastMessage}
+        type="success"
+        duration={1400}
+        onClose={() => setIsSuccessToastOpen(false)}
+      />
     </form>
   );
 }

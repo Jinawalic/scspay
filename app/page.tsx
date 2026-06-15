@@ -1,14 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { Lock, Mail, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function StudentLoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [formError, setFormError] = useState("");
   const [formData, setFormData] = useState({
     matricNumber: "",
     password: "",
@@ -19,38 +23,48 @@ export default function StudentLoginPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setFormError("");
 
-    console.log("User login attempted with:", formData);
+    try {
+      const response = await fetch("/api/students/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-    // Simulated API call delay before routing to dashboard
-    setTimeout(() => {
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Unable to sign you in right now");
+      }
+
+      router.replace(data.redirectTo ?? "/dashboard");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to sign you in right now";
+      setFormError(message);
+    } finally {
       setIsLoading(false);
-      router.push("/dashboard"); 
-    }, 2000);
+    }
   };
 
   return (
     <main className="min-h-screen relative flex items-center justify-center p-3 font-sans select-none antialiased">
-      {/* 1. Full-Screen Background Image (Cloudy Sky) */}
       <Image
         src="/images/logo.png"
         alt="Cloudy blue sky background"
         fill
-        priority
         className="object-contain object-center z-0"
       />
 
-      {/* Optional Overlay for readability/depth */}
       <div className="absolute inset-0 bg-slate-900/70 z-10" />
 
-      {/* 3. Reusable Login Card Component (Integrated Shell) */}
       <div className="relative w-md h-120 max-w-md bg-white rounded-3xl border border-slate-200/60 overflow-hidden animate-in fade-in zoom-in-95 duration-300 z-30">
-        {/* Card Header and Intro */}
         <div className="flex flex-col items-center pt-5 pb-3 select-none">
-          {/* Brand Logo Wrapper */}
           <div className="flex items-center gap-2.5 px-2">
             <div className="flex flex-col gap-0.5 justify-center">
               <div className="flex items-center gap-1">
@@ -67,16 +81,14 @@ export default function StudentLoginPage() {
           </p>
         </div>
 
-        {/* --- Main Login Form --- */}
         <form onSubmit={handleLogin} className="px-10 pb-10 space-y-2">
-          {/* Matric Number Input */}
           <div className="space-y-1">
             <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
               Matric Number
             </label>
             <div className="relative">
               <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input
+              <Input
                 type="text"
                 name="matricNumber"
                 required
@@ -89,14 +101,13 @@ export default function StudentLoginPage() {
             </div>
           </div>
 
-          {/* Password Input */}
           <div className="space-y-1.5">
             <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
               Password
             </label>
             <div className="relative">
               <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input
+              <Input
                 type={showPassword ? "text" : "password"}
                 name="password"
                 required
@@ -121,7 +132,6 @@ export default function StudentLoginPage() {
             </div>
           </div>
 
-          {/* Forgot Password Link */}
           <div className="flex justify-end pt-1">
             <button
               type="button"
@@ -132,39 +142,37 @@ export default function StudentLoginPage() {
             </button>
           </div>
 
-          {/* The Main GREEN Branding Action Button with Inline Spinner */}
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
-            className="w-full h-10 flex items-center justify-center gap-2 px-6 rounded-xl bg-emerald-800 text-white text-xs font-bold hover:bg-emerald-900 transition active:scale-95 tracking-wide mt-2 disabled:opacity-80 disabled:cursor-not-allowed disabled:active:scale-100"
+            className="w-full h-10 flex items-center justify-center gap-2 px-6 rounded-xl bg-emerald-800 text-white text-xs font-bold hover:bg-emerald-900 transition active:scale-95 tracking-wide mt-2 disabled:opacity-80 disabled:cursor-not-allowed disabled:active:scale-100 shadow-md shadow-emerald-800/10"
           >
             {isLoading ? (
-              <svg 
-                className="animate-spin h-4 w-4 text-white" 
-                xmlns="http://www.w3.org/2000/svg" 
-                fill="none" 
+              <svg
+                className="animate-spin h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
                 viewBox="0 0 24 24"
               >
-                <circle 
-                  className="opacity-25" 
-                  cx="12" 
-                  cy="12" 
-                  r="10" 
-                  stroke="currentColor" 
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
                   strokeWidth="4"
                 />
-                <path 
-                  className="opacity-75" 
-                  fill="currentColor" 
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 />
               </svg>
             ) : (
               "Login"
             )}
-          </button>
+          </Button>
 
-          {/* Dotted Separator and Alternative Sign In */}
           <div className="relative select-none">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-dotted border-slate-200" />
@@ -176,9 +184,8 @@ export default function StudentLoginPage() {
             </div>
           </div>
 
-          {/* Social Sign In Buttons */}
           <div className="grid grid-cols-1 pt-1">
-            <button 
+            <button
               type="button"
               disabled={isLoading}
               className="flex items-center justify-center h-10 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-slate-200 transition group active:scale-95 disabled:opacity-40 disabled:active:scale-100"
@@ -192,7 +199,12 @@ export default function StudentLoginPage() {
             </button>
           </div>
 
-          {/* Registration Redirect Layout Unit Context */}
+          {formError && (
+            <p className="pt-1 text-center text-xs font-semibold text-rose-600">
+              {formError}
+            </p>
+          )}
+
           <div className="text-center text-xs text-slate-500 font-semibold pt-2">
             Don't have an account?{" "}
             <button
