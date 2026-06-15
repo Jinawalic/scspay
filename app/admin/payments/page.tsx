@@ -276,7 +276,6 @@ export default function TransactionPage() {
                     <th className="py-3.5 px-4">Department</th>
                     <th className="py-3.5 px-4">Payment Type</th>
                     <th className="py-3.5 px-4">Amount</th>
-                    <th className="py-3.5 px-4">Date</th>
                     <th className="py-3.5 px-4 text-center w-24">Status</th>
                   </tr>
                 </thead>
@@ -297,7 +296,6 @@ export default function TransactionPage() {
                         <td className="py-3.5 px-4 text-slate-600 truncate max-w-[160px]">{tx.department || "—"}</td>
                         <td className="py-3.5 px-4 text-slate-600 truncate max-w-[140px]">{tx.type}</td>
                         <td className="py-3.5 px-4 font-bold text-slate-900">{tx.amountLabel}</td>
-                        <td className="py-3.5 px-4 text-slate-400 text-[12px]">{tx.date}</td>
                         <td className="py-3.5 px-4 text-center">
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100/60">
                             <span className="h-1 w-1 rounded-full bg-emerald-500" />

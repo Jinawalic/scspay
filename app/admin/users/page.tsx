@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Plus, 
   Download, 
@@ -32,22 +32,35 @@ interface UserData {
   dateCreated: string;
 }
 
-const INITIAL_USERS: UserData[] = [
-  { id: 1, role: "Super Admin", fullName: "John Doe", matricNumber: "MAT001", department: "Administration", phone: "0813-2222-8899", dateCreated: "27 Mar 2024 18:45" },
-  { id: 2, role: "Engineering", fullName: "Abizar Alghifary", matricNumber: "MAT002", department: "Engineering", phone: "0813-4729-1056", dateCreated: "26 Mar 2024 14:22" },
-  { id: 3, role: "Housekeeping", fullName: "Raffi Ahmad", matricNumber: "MAT003", department: "Housekeeping", phone: "0821-0394-7682", dateCreated: "25 Mar 2024 09:57" },
-  { id: 4, role: "Receptionist", fullName: "Putri Amaliah", matricNumber: "MAT004", department: "Reception", phone: "0812-5583-9217", dateCreated: "24 Mar 2024 20:10" },
-  { id: 5, role: "Purchasing", fullName: "Shepherd Edward", matricNumber: "MAT005", department: "Purchasing", phone: "0852-7741-3320", dateCreated: "23 Mar 2024 16:33" },
-  { id: 6, role: "Accounting", fullName: "Ezel Sudarso", matricNumber: "MAT006", department: "Accounting", phone: "0813-6902-4815", dateCreated: "22 Mar 2024 11:48" },
-  { id: 7, role: "Marketing", fullName: "Edward Newgate", matricNumber: "MAT007", department: "Marketing", phone: "0821-8173-0469", dateCreated: "21 Mar 2024 08:15" }
-];
-
 export default function UserManagementPage() {
-  const [users, setUsers] = useState<UserData[]>(INITIAL_USERS);
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // Load users from API
+  useEffect(() => {
+    let isMounted = true;
+
+    const load = async () => {
+      try {
+        const res = await fetch("/api/admin/students", { cache: "no-store" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error ?? "Unable to load users");
+        if (isMounted) setUsers(data.students ?? []);
+      } catch (err) {
+        if (isMounted) setLoadError(err instanceof Error ? err.message : "Unable to load users");
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    void load();
+    return () => { isMounted = false; };
+  }, []);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedUserForDelete, setSelectedUserForDelete] = useState<UserData | null>(null);
@@ -173,7 +186,19 @@ export default function UserManagementPage() {
               </thead>
               
               <tbody className="divide-y divide-slate-100/60 text-[14px] font-medium text-slate-700 h-full">
-                {displayedUsers.length > 0 ? (
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={columns.length + 1} className="py-12 text-center text-slate-400 font-semibold text-sm">
+                      Loading user records...
+                    </td>
+                  </tr>
+                ) : loadError ? (
+                  <tr>
+                    <td colSpan={columns.length + 1} className="py-12 text-center text-rose-500 font-semibold text-sm">
+                      {loadError}
+                    </td>
+                  </tr>
+                ) : displayedUsers.length > 0 ? (
                   displayedUsers.map((user, index) => (
                     <tr key={user.id} className="hover:bg-slate-50/50 transition-colors group">
                       <td className="py-3.5 px-4 font-bold text-slate-400 pl-6">
