@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     const response = NextResponse.json({
       student: createStudentProfilePayload(student),
-      redirectTo: student.completed ? "/dashboard" : "/complete-profile",
+      redirectTo: "/dashboard",
     });
 
     setStudentSessionCookie(response, student.id);

@@ -47,6 +47,7 @@ type RegisterFormValues = StepOneValues & StepTwoValues;
 export function RegisterForm({ layout = "desktop" }: { layout?: "desktop" | "mobile" }) {
   const router = useRouter();
   const [step, setStep] = useState(1);
+  const [isAdvancing, setIsAdvancing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -101,7 +102,11 @@ export function RegisterForm({ layout = "desktop" }: { layout?: "desktop" | "mob
         return;
       }
 
-      setStep(2);
+      setIsAdvancing(true);
+      window.setTimeout(() => {
+        setStep(2);
+        setIsAdvancing(false);
+      }, 250);
       return;
     }
 
@@ -321,10 +326,10 @@ export function RegisterForm({ layout = "desktop" }: { layout?: "desktop" | "mob
         <div className="pt-4 space-y-4">
           <Button
             type="submit"
-            disabled={isSubmitting || isRedirecting}
+            disabled={isSubmitting || isRedirecting || isAdvancing}
             className="w-full bg-[#135A3D] py-4 text-center text-sm font-bold text-white shadow-md shadow-emerald-950/10 hover:bg-[#0e4830] transition active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
           >
-            {isSubmitting || isRedirecting ? (step === 1 ? "Continuing..." : "Registering...") : (step === 1 ? "Continue" : "Complete Registration")}
+            {isSubmitting || isRedirecting || isAdvancing ? (step === 1 ? "Continuing..." : "Registering...") : (step === 1 ? "Continue" : "Complete Registration")}
           </Button>
 
           <div className="flex flex-col gap-3 items-center justify-center">
@@ -393,7 +398,7 @@ export function RegisterForm({ layout = "desktop" }: { layout?: "desktop" | "mob
             {errors.confirmPassword && <p className="text-xs text-rose-600">{errors.confirmPassword.message}</p>}
           </div>
           <div className="flex items-center justify-between gap-4 text-sm text-slate-600">
-            <Button type="submit" className="w-full" disabled={isSubmitting || isRedirecting}>Continue</Button>
+            <Button type="submit" className="w-full" disabled={isSubmitting || isRedirecting || isAdvancing}>Continue</Button>
             <Button type="button" variant="ghost" className="w-full" onClick={() => router.push("/")}>Back to Login</Button>
           </div>
         </>
@@ -410,7 +415,7 @@ export function RegisterForm({ layout = "desktop" }: { layout?: "desktop" | "mob
             {errors.matricNumber && <p className="text-xs text-rose-600">{errors.matricNumber.message}</p>}
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button type="submit" className="w-full" disabled={isSubmitting || isRedirecting}>Complete Registration</Button>
+            <Button type="submit" className="w-full" disabled={isSubmitting || isRedirecting || isAdvancing}>Complete Registration</Button>
             <Button type="button" variant="outline" className="w-full" onClick={() => setStep(1)}>
               Back to Login
             </Button>
