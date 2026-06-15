@@ -1,7 +1,10 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { X, LucideIcon } from "lucide-react";
+import { X, type LucideIcon } from "lucide-react";
+
+// Import your reusable atomic workspace components
+import { IconButton } from "@/components/admin/IconButton";
 
 interface ModalShellProps {
   isOpen: boolean;
@@ -12,7 +15,7 @@ interface ModalShellProps {
 }
 
 export function ModalShell({ isOpen, onClose, title, icon: Icon, children }: ModalShellProps) {
-  // Prevent background scrolling when a modal overlay is open
+  // Prevent background scrolling when a modal overlay is active on the screen canvas
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -21,7 +24,7 @@ export function ModalShell({ isOpen, onClose, title, icon: Icon, children }: Mod
     }
     return () => {
       document.body.style.overflow = "unset";
-    }
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -43,13 +46,14 @@ export function ModalShell({ isOpen, onClose, title, icon: Icon, children }: Mod
               {title}
             </h3>
           </div>
-          <button
-            type="button"
+          
+          {/* Swapped out raw standard button markup for the reusable atomic IconButton variant */}
+          <IconButton
+            icon={X}
+            variant="default"
+            title="Close Modal"
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          />
         </div>
 
         {/* Dynamic Nested Content Element slots safely injected below */}

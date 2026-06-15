@@ -4,10 +4,8 @@ import React, { useState } from "react";
 import { 
   Plus, 
   Download, 
-  Search, 
   ChevronDown, 
   ChevronUp, 
-  Eye, 
   Trash2, 
   Edit2, 
   ChevronLeft, 
@@ -15,8 +13,15 @@ import {
   MoreVertical
 } from "lucide-react";
 import { AdminLayoutContainer } from "@/components/admin/AdminLayoutContainer";
+import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationModal";
+import { EditUserModal } from "@/components/admin/EditUserModal";
+import { ToastNotification, ToastType } from "@/components/admin/ToastNotification";
 
-// Types matching the data columns
+// Import your newly created atomic reusable components here
+import { SearchInput } from "@/components/admin/SearchInput";
+import { IconButton } from "@/components/admin/IconButton";
+import { Button } from "@/components/admin/Button";
+
 interface UserData {
   id: number;
   role: string;
@@ -27,10 +32,8 @@ interface UserData {
   dateCreated: string;
 }
 
-// Mock Data
-const mockUsers: UserData[] = [
+const INITIAL_USERS: UserData[] = [
   { id: 1, role: "Super Admin", fullName: "John Doe", matricNumber: "MAT001", department: "Administration", phone: "0813-2222-8899", dateCreated: "27 Mar 2024 18:45" },
-
   { id: 2, role: "Engineering", fullName: "Abizar Alghifary", matricNumber: "MAT002", department: "Engineering", phone: "0813-4729-1056", dateCreated: "26 Mar 2024 14:22" },
   { id: 3, role: "Housekeeping", fullName: "Raffi Ahmad", matricNumber: "MAT003", department: "Housekeeping", phone: "0821-0394-7682", dateCreated: "25 Mar 2024 09:57" },
   { id: 4, role: "Receptionist", fullName: "Putri Amaliah", matricNumber: "MAT004", department: "Reception", phone: "0812-5583-9217", dateCreated: "24 Mar 2024 20:10" },
@@ -40,28 +43,73 @@ const mockUsers: UserData[] = [
 ];
 
 export default function UserManagementPage() {
+  const [users, setUsers] = useState<UserData[]>(INITIAL_USERS);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // 1. Filtering & Searching Logic
-  const filteredUsers = mockUsers.filter(user => {
-    const matchesSearch = 
-      user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.matricNumber.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedUserForDelete, setSelectedUserForDelete] = useState<UserData | null>(null);
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedUserForEdit, setSelectedUserForEdit] = useState<UserData | null>(null);
+
+  // Reusable System Toast state structure maps directly here
+  const [toast, setToast] = useState<{ isOpen: boolean; message: string; type: ToastType }>({
+    isOpen: false,
+    message: "",
+    type: "success"
   });
 
-  // 2. Pagination Calculations
+  const triggerToast = (message: string, type: ToastType = "success") => {
+    setToast({ isOpen: true, message, type });
+  };
+
+  const filteredUsers = users.filter(user => {
+    return (
+      user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.matricNumber.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+
   const totalData = filteredUsers.length;
   const totalPages = Math.ceil(totalData / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const displayedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
 
-  // Column headers with sort arrows
+  const triggerDeleteFlow = (user: UserData) => {
+    setSelectedUserForDelete(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!selectedUserForDelete) return;
+    setUsers((prev) => prev.filter((u) => u.id !== selectedUserForDelete.id));
+    setIsDeleteModalOpen(false);
+    setSelectedUserForDelete(null);
+    triggerToast("User record has been permanently deleted.", "success");
+
+    if (displayedUsers.length === 1 && currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  const triggerEditFlow = (user: UserData) => {
+    setSelectedUserForEdit(user);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = (updatedUser: UserData) => {
+    setUsers((prev) => prev.map((u) => u.id === updatedUser.id ? updatedUser : u));
+    setIsEditModalOpen(false);
+    setSelectedUserForEdit(null);
+    triggerToast(`Successfully modified record settings for ${updatedUser.fullName}`, "success");
+  };
+
   const columns = [
+    { label: "S/N", icon: false },
     { label: "Full Name", icon: true },
     { label: "Matric Num.", icon: true },
     { label: "Department", icon: true },
@@ -74,16 +122,6 @@ export default function UserManagementPage() {
       {/* 1. Page Title and Contextual Actions Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-1 select-none">
         <h1 className="text-[15px] font-bold text-slate-900">User Management</h1>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition active:scale-95">
-            <Download className="h-4 w-4 text-slate-400 stroke-[2.5]" />
-            Export data
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-emerald-800 rounded-xl hover:bg-emerald-800 transition active:scale-95">
-            <Plus className="h-4 w-4 text-white stroke-[2.5]" />
-            Add New User
-          </button>
-        </div>
       </div>
 
       {/* 2. Clean Embedded White Panel Card Container */}
@@ -91,30 +129,23 @@ export default function UserManagementPage() {
         
         {/* Toolbar: Dynamic Filters and Input Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between select-none">
-          {/* Status Dropdown Filter */}
-          <div className="relative w-full sm:w-48">
-            <button className="w-full flex items-center justify-between px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 hover:bg-slate-100/70 transition">
-              <span>{statusFilter}</span>
-              <ChevronDown className="h-3.5 w-3.5 text-slate-400 stroke-[2.5]" />
-            </button>
-          </div>
 
-          {/* Right Align Toolbar: Search and Table Contextual Actions */}
           <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="relative flex-1 sm:w-64">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-              <input 
-                type="text"
-                placeholder="Search Username, Name, Email"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none placeholder-slate-400 focus:border-slate-300 focus:bg-white transition-colors"
-              />
+            {/* Reusable Context-aware search framework container */}
+            <SearchInput 
+              placeholder="Search Username, Name, Email"
+              value={searchTerm}
+              onChange={(value) => {
+                setSearchTerm(value);
+                setCurrentPage(1);
+              }}
+            />
+            
+            <div className="flex items-center gap-3 ml-80">
+                {/* Using reusable global structured button elements here */}
+                <Button icon={Download} variant="white">Export data</Button>
+                <Button icon={Plus} variant="emerald">Add New User</Button>
             </div>
-            {/* Contextual More Actions Dropdown */}
-            <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-100 bg-white text-slate-400 hover:text-slate-700 transition active:scale-95">
-              <MoreVertical className="h-4.5 w-4.5 stroke-[2.5]" />
-            </button>
           </div>
         </div>
 
@@ -122,12 +153,11 @@ export default function UserManagementPage() {
         <div className="w-full overflow-hidden border border-slate-100 rounded-xl bg-white flex-1">
           <div className="w-full overflow-x-auto h-full">
             <table className="w-full text-left border-collapse h-full">
-              {/* Dynamic Header Structure */}
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold text-slate-400 uppercase tracking-wider select-none">
                   {columns.map((col, idx) => (
-                    <th key={col.label} className={`py-4 px-4 ${idx === 0 ? "pl-6" : ""}`}>
-                      <div className="flex items-center gap-1.5 cursor-pointer hover:text-slate-600 transition group">
+                    <th key={col.label} className={`py-4 px-4 ${idx === 0 ? "pl-6 w-16" : ""}`}>
+                      <div className={`flex items-center gap-1.5 transition group ${col.icon ? "cursor-pointer hover:text-slate-600" : ""}`}>
                         {col.label}
                         {col.icon && (
                           <div className="flex flex-col -space-y-0.5 opacity-60 group-hover:opacity-100">
@@ -142,26 +172,44 @@ export default function UserManagementPage() {
                 </tr>
               </thead>
               
-              {/* Conditional Table Body */}
               <tbody className="divide-y divide-slate-100/60 text-[14px] font-medium text-slate-700 h-full">
                 {displayedUsers.length > 0 ? (
-                  displayedUsers.map((user) => (
+                  displayedUsers.map((user, index) => (
                     <tr key={user.id} className="hover:bg-slate-50/50 transition-colors group">
-                      <td className="py-3.5 px-4 font-bold text-slate-900 truncate max-w-[150px]">{user.fullName}</td>
-                      <td className="py-3.5 px-4 text-slate-600 truncate max-w-[200px]">{user.matricNumber}</td>
-                      <td className="py-3.5 px-4 text-slate-600 truncate max-w-[200px]">{user.department}</td>
-                      <td className="py-3.5 px-4 text-slate-500 font-mono tracking-tight">{user.phone}</td>
+                      <td className="py-3.5 px-4 font-bold text-slate-400 pl-6">
+                        {startIndex + index + 1}
+                      </td>
+                      <td className="py-3.5 px-4 font-bold text-slate-900 truncate max-w-[150px]">
+                        {user.fullName}
+                      </td>
+                      <td className="py-3.5 px-4 text-slate-600 truncate max-w-[200px]">
+                        {user.matricNumber}
+                      </td>
+                      <td className="py-3.5 px-4 text-slate-600 truncate max-w-[200px]">
+                        {user.department}
+                      </td>
+                      <td className="py-3.5 px-4 text-slate-500 font-mono tracking-tight">
+                        {user.phone}
+                      </td>
                       <td className="py-3.5 px-4 text-center pr-6">
                         <div className="flex items-center gap-2 justify-center">
-                          <button className="h-7 w-7 inline-flex items-center justify-center rounded-lg border border-slate-100 bg-white text-slate-400 hover:text-slate-700 hover:border-slate-300 transition active:scale-95">
-                            <Eye className="h-3.5 w-3.5" />
-                          </button>
-                          <button className="h-7 w-7 inline-flex items-center justify-center rounded-lg border border-slate-100 bg-white text-slate-400 hover:text-[#135A3D] hover:border-emerald-200 hover:bg-emerald-50 transition active:scale-95">
-                            <Edit2 className="h-3.5 w-3.5" />
-                          </button>
-                          <button className="h-7 w-7 inline-flex items-center justify-center rounded-lg border border-slate-100 bg-white text-rose-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition active:scale-95">
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                          {/* Called the clean structured custom components directly for safety */}
+                          <IconButton 
+                            icon={Edit2} 
+                            variant="emerald"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              triggerEditFlow(user);
+                            }}
+                          />
+                          <IconButton 
+                            icon={Trash2} 
+                            variant="rose"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              triggerDeleteFlow(user);
+                            }}
+                          />
                         </div>
                       </td>
                     </tr>
@@ -189,7 +237,6 @@ export default function UserManagementPage() {
           </div>
           
           <div className="flex items-center gap-1.5">
-            {/* Prev */}
             <button 
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
@@ -199,7 +246,6 @@ export default function UserManagementPage() {
               <span>Previous</span>
             </button>
             
-            {/* Page numbers */}
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
                 key={page}
@@ -214,7 +260,6 @@ export default function UserManagementPage() {
               </button>
             ))}
 
-            {/* Next */}
             <button 
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
@@ -227,6 +272,34 @@ export default function UserManagementPage() {
         </div>
 
       </div>
+
+      <EditUserModal 
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedUserForEdit(null);
+        }}
+        onSave={handleSaveEdit}
+        initialData={selectedUserForEdit}
+      />
+
+      <DeleteConfirmationModal 
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedUserForDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        itemName={selectedUserForDelete ? `${selectedUserForDelete.fullName} (${selectedUserForDelete.matricNumber})` : ""}
+      />
+
+      {/* Render the actual reusable component here safely */}
+      <ToastNotification 
+        isOpen={toast.isOpen}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast((prev) => ({ ...prev, isOpen: false }))}
+      />
     </AdminLayoutContainer>
   );
 }

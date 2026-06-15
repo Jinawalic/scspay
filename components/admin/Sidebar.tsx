@@ -11,7 +11,8 @@ import {
   Settings, 
   HelpCircle,
   ChevronRight,
-  LogOut
+  LogOut,
+  ClipboardPlus
 } from "lucide-react";
 
 interface SidebarProps {
@@ -27,6 +28,7 @@ export function Sidebar({ activeSegment }: SidebarProps) {
     { name: "User Management", icon: Users, path: "/admin/users" },
     { name: "View Payments", icon: CreditCard, path: "/admin/payments" },
     { name: "Configure Payment", icon: PlusCircle, path: "/admin/payments/create" },
+    { name: "Manage Dept", icon: ClipboardPlus, path: "/admin/departments" },
   ];
 
   const utilityNav = [
@@ -55,9 +57,11 @@ export function Sidebar({ activeSegment }: SidebarProps) {
           {mainNav.map((item) => {
             const Icon = item.icon;
             
-            // Fallback strategy: Matches explicitly passed activeSegment prop OR checks if current URL path matches
+            // Evaluates exact string matching OR maps explicit layout container activeSegment declarations
             const isActive = activeSegment 
-              ? item.name.toLowerCase() === activeSegment.toLowerCase() || (item.name === "Configure Payment" && activeSegment.toLowerCase() === "create payment")
+              ? item.name.toLowerCase() === activeSegment.toLowerCase() || 
+                (item.name === "Configure Payment" && activeSegment.toLowerCase() === "create payment") ||
+                (item.name === "Manage Dept" && activeSegment.toLowerCase() === "departments")
               : pathname === item.path;
 
             return (
@@ -66,7 +70,7 @@ export function Sidebar({ activeSegment }: SidebarProps) {
                 href={item.path}
                 className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-[15px] font-bold tracking-wide transition-all duration-200 group relative ${
                   isActive
-                    ? "bg-emerald-800 text-white border border-emerald-900 shadow-md shadow-emerald-800/10"
+                    ? "bg-emerald-800 text-white border border-emerald-900"
                     : "text-slate-500 hover:text-slate-900 hover:bg-slate-100/60 border border-transparent"
                 }`}
               >
@@ -88,14 +92,14 @@ export function Sidebar({ activeSegment }: SidebarProps) {
           })}
 
           {/* Secure Admin Logout Trigger Component */}
-        <button
-          type="button"
-          onClick={() => router.push("/admin/login")}
-          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50/60 transition duration-150 group border border-transparent active:scale-95"
-        >
-          <LogOut className="h-4.5 w-4.5 text-slate-400 group-hover:text-rose-500 transition-colors stroke-[2]" />
-          <span>Logout</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => router.push("/admin")}
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50/60 transition duration-150 group border border-transparent active:scale-95"
+          >
+            <LogOut className="h-4.5 w-4.5 text-slate-400 group-hover:text-rose-500 transition-colors stroke-[2]" />
+            <span>Logout</span>
+          </button>
         </nav>
       </div>
 

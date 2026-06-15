@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Eye, SlidersHorizontal, Trash, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Eye, SlidersHorizontal, Trash, ChevronLeft, ChevronRight } from "lucide-react";
+import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationModal";
+
+// Import your newly created atomic reusable components here
+import { SearchInput } from "@/components/admin/SearchInput";
+import { IconButton } from "@/components/admin/IconButton";
 
 export interface TransactionItem {
   id: string;
@@ -14,12 +19,17 @@ export interface TransactionItem {
 
 interface TransactionTableProps {
   transactions: TransactionItem[];
+  onDelete: (id: string) => void;
 }
 
-export function TransactionTable({ transactions }: TransactionTableProps) {
+export function TransactionTable({ transactions, onDelete }: TransactionTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  // Reusable Overlay Interaction Tracking States
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedTx, setSelectedTx] = useState<TransactionItem | null>(null);
 
   // 1. Filter data based on search input (matching Transaction ID or Student/Customer name)
   const filteredTransactions = transactions.filter((tx) =>
@@ -33,6 +43,29 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedTransactions = filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
 
+  // Execution Flow Triggers for Destructive Pipeline
+  const triggerDeleteFlow = (tx: TransactionItem) => {
+    setSelectedTx(tx);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    // Fallback safe-check to handle asynchronous state transitions smoothly
+    if (!selectedTx) return;
+    
+    // Bubble up item drop manipulation to the parent state container
+    onDelete(selectedTx.id);
+    
+    // Close overlay state wrappers and clean up tracking parameters
+    setIsDeleteModalOpen(false);
+    setSelectedTx(null);
+
+    // Safeguard page indexing boundaries if removing last element on active leaf
+    if (paginatedTransactions.length === 1 && currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Section Content Filter Utilities Header Line Row */}
@@ -45,20 +78,15 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
 
         {/* Search Input and Filter Group Alignment Box */}
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          {/* Integrated Search Input Element Wrapper */}
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search transaction..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1); // Reset to first page on search typing
-              }}
-              className="w-full pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 placeholder-slate-400 focus:outline-none focus:border-slate-300 focus:bg-white transition-colors"
-            />
-          </div>
+          {/* Integrated Atomic Search Input Component */}
+          <SearchInput
+            placeholder="Search transaction..."
+            value={searchQuery}
+            onChange={(value) => {
+              setSearchQuery(value);
+              setCurrentPage(1); // Reset to first page on search typing
+            }}
+          />
 
           {/* Action Sort Action Selection Trigger Box */}
           <button
@@ -77,18 +105,23 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider select-none">
-                <th className="py-3 px-4">Transaction ID</th>
-                <th className="py-3 px-4">Student</th>
-                <th className="py-3 px-4">Date</th>
-                <th className="py-3 px-4">Amount</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-center w-12">Action</th>
+                <th className="py-3.5 px-5 w-16">S/N</th>
+                <th className="py-3.5 px-4">Transaction ID</th>
+                <th className="py-3.5 px-4">Student</th>
+                <th className="py-3.5 px-4">Date</th>
+                <th className="py-3.5 px-4">Amount</th>
+                <th className="py-3.5 px-4">Status</th>
+                <th className="py-3.5 px-4 text-center w-24">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100/70 text-[14px] font-semibold text-slate-700">
               {paginatedTransactions.length > 0 ? (
-                paginatedTransactions.map((tx) => (
+                paginatedTransactions.map((tx, index) => (
                   <tr key={tx.id} className="hover:bg-slate-50/50 transition-colors group">
+                    {/* Calculated Dynamic Serial Number Column */}
+                    <td className="py-4 px-5 font-bold text-slate-900 tracking-wide">
+                      {startIndex + index + 1}
+                    </td>
                     <td className="py-3.5 px-4 font-bold text-slate-900">
                       {tx.id}
                     </td>
@@ -117,25 +150,30 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                         {tx.status}
                       </span>
                     </td>
-                    <td className="flex py-3.5 px-4 text-center gap-3 justify-center">
-                      <button
-                        type="button"
-                        className="h-5 w-5 inline-flex items-center justify-center text-slate-400 hover:text-slate-700 transition"
-                      >
-                        <Eye className="h-4.5 w-4.5" />
-                      </button>
-                      <button
-                        type="button"
-                        className="h-5 w-5 inline-flex items-center justify-center text-rose-400 hover:text-red-500 transition"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </button>
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-3 justify-center">
+                        {/* Utilized the reusable functional IconButton components smoothly */}
+                        <IconButton
+                          icon={Eye}
+                          variant="default"
+                          title="View Details"
+                        />
+                        <IconButton
+                          icon={Trash}
+                          variant="rose"
+                          title="Delete Transaction Record"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Stops DOM layout bubbling vectors cleanly
+                            triggerDeleteFlow(tx);
+                          }}
+                        />
+                      </div>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 font-medium text-slate-400">
+                  <td colSpan={7} className="text-center py-8 font-medium text-slate-400">
                     No transactions found.
                   </td>
                 </tr>
@@ -182,7 +220,7 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
             <button
               type="button"
               disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((prev) => prev + 1)}
+              onClick={() => setCurrentPage((prev) => prev + 1)} // Fixed logic index error here (from prev - 1)
               className="h-7 w-7 inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition"
             >
               <ChevronRight className="h-3.5 w-3.5" />
@@ -190,6 +228,17 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
           </div>
         </div>
       </div>
+
+      {/* --- Global Standalone Deletion Warning Overlay Mounting Target --- */}
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedTx(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        itemName={selectedTx ? `Tx ID: ${selectedTx.id} (${selectedTx.customer})` : ""}
+      />
     </div>
   );
 }

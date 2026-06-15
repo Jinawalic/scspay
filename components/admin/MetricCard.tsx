@@ -7,7 +7,8 @@ interface MetricCardProps {
   title: string;
   value: string;
   icon: LucideIcon;
-  changeText: string;
+  subtitle: string;
+  subtitleColor: string; // 👈 New prop for dynamic color injection
   isNegative?: boolean;
 }
 
@@ -15,6 +16,8 @@ export function MetricCard({
   title,
   value,
   icon: Icon,
+  subtitle,
+  subtitleColor,
   isNegative = false
 }: MetricCardProps) {
   return (
@@ -35,7 +38,8 @@ export function MetricCard({
           {value}
         </h3>
         <p className="text-[10px] font-bold tracking-normal pt-1 flex items-center gap-1">
-          <span className="text-emerald-400 font-medium">Platform registered students</span>
+          {/* 👈 Merged subtitleColor dynamically here */}
+          <span className={`${subtitleColor} font-medium`}>{subtitle}</span>
         </p>
       </div>
     </div>
