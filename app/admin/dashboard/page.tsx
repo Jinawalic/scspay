@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { User, CreditCard, AlarmClock, ChevronDown } from "lucide-react";
+import { User, CreditCard, AlarmClock, CalendarRange } from "lucide-react";
 import { AdminLayoutContainer } from "@/components/admin/AdminLayoutContainer";
 import { MetricCard } from "@/components/admin/MetricCard";
 import { TransactionTable, type TransactionItem } from "@/components/admin/TransactionTable";
@@ -18,14 +18,16 @@ const INITIAL_TRANSACTIONS: TransactionItem[] = [
   { id: "#TRX-2385", customer: "Paula Mora", date: "June 25, 2024", product: "June 25, 2024", amount: "$89.00", status: "Pending" },
 ];
 
-const AVAILABLE_SESSIONS = ["2024/2025", "2025/2026", "2026/2027"];
-
 export default function AdminDashboardPage() {
   const [transactions, setTransactions] = useState<TransactionItem[]>(INITIAL_TRANSACTIONS);
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // Dashboard Session Managing States
   const [currentSession, setCurrentSession] = useState("2026/2027");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [sessionInputValue, setSessionInputValue] = useState("2026/2027");
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  
+  const popoverRef = useRef<HTMLDivElement>(null);
 
   // Reusable System Toast state structure
   const [toast, setToast] = useState<{ isOpen: boolean; message: string; type: ToastType }>({
@@ -38,21 +40,31 @@ export default function AdminDashboardPage() {
     setToast({ isOpen: true, message, type });
   };
 
-  // Close dropdown cleanly when clicking completely outside the menu container boundary
+  // Close the mini card context wrapper automatically if clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
+      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+        setIsPopoverOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSessionChange = (session: string) => {
-    setCurrentSession(session);
-    setIsDropdownOpen(false);
-    triggerToast(`Academic dashboard view switched to session tracking profile: ${session}`, "success");
+  const handleOpenPopover = () => {
+    setSessionInputValue(currentSession); // Seed current val when opened
+    setIsPopoverOpen(!isPopoverOpen);
+  };
+
+  const handleCommitSessionUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    const formattedSession = sessionInputValue.trim();
+    
+    if (!formattedSession) return;
+
+    setCurrentSession(formattedSession);
+    setIsPopoverOpen(false);
+    triggerToast(`Academic dashboard view switched to session tracking profile: ${formattedSession}`, "success");
   };
 
   // Performance Metric Tracker Card Dataset Slices
@@ -105,36 +117,53 @@ export default function AdminDashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 select-none">
           <h1 className="text-[15px] font-bold text-slate-900">Dashboard Overview</h1>
           
-          {/* Integrated Session Menu Dropdown Stack Container */}
-          <div className="relative" ref={dropdownRef}>
+          {/* Relative anchor wrapper container */}
+          <div className="relative" ref={popoverRef}>
             <Button 
               variant="default" 
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center gap-2 text-white"
+              type="button"
+              onClick={handleOpenPopover}
+              className="text-white"
             >
-              <span>Set Session</span>
-              <ChevronDown className={`h-3.5 w-3.5 text-white transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} />
+              Set Session
             </Button>
 
-            {isDropdownOpen && (
-              <div className="absolute right-0 mt-1.5 w-44 bg-white border border-slate-200/80 rounded-xl py-1.5 z-30 animate-in fade-in slide-in-from-top-1 duration-150">
-                <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 mb-1">
-                  Select Active Session
-                </div>
-                {AVAILABLE_SESSIONS.map((session) => (
-                  <button
-                    key={session}
-                    type="button"
-                    onClick={() => handleSessionChange(session)}
-                    className={`w-full text-left px-3 py-2 text-xs font-semibold transition-colors ${
-                      session === currentSession 
-                        ? "bg-slate-50 text-emerald-800 font-bold" 
-                        : "text-slate-600 hover:bg-slate-50/80 hover:text-slate-900"
-                    }`}
-                  >
-                    {session}
-                  </button>
-                ))}
+            {/* Small dynamic input card floating underneath button anchor */}
+            {isPopoverOpen && (
+              <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 shadow-xl rounded-xl p-4 z-40 animate-in fade-in slide-in-from-top-2 duration-150">
+                <form onSubmit={handleCommitSessionUpdate} className="space-y-3">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                      <CalendarRange className="h-3 w-3" />
+                      Academic Session
+                    </label>
+                    <input
+                      type="text"
+                      autoFocus
+                      required
+                      placeholder="e.g., 2026/2027"
+                      value={sessionInputValue}
+                      onChange={(e) => setSessionInputValue(e.target.value)}
+                      className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-300 focus:outline-none focus:border-slate-300 focus:bg-white transition"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => setIsPopoverOpen(false)}
+                      className="px-2.5 py-1 text-[11px] font-bold text-slate-500 hover:bg-slate-50 rounded-md transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-3 py-1 text-[11px] font-bold text-white bg-emerald-800 hover:bg-emerald-900 rounded-md shadow-sm transition"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </form>
               </div>
             )}
           </div>
@@ -157,7 +186,6 @@ export default function AdminDashboardPage() {
 
         {/* Payment History Data Header with Integrated Filter Options */}
         <div className="pt-4 flex flex-col space-y-3">
-          {/* Main Operational Table View Block Section */}
           <div className="pt-1 flex-1">
             <TransactionTable 
               transactions={filteredTransactions} 

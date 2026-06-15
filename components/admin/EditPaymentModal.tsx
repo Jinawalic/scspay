@@ -11,7 +11,6 @@ interface CreatedPaymentItem {
   id: string;
   title: string;
   amount: string;
-  session: string;
   action: string;
 }
 
@@ -23,7 +22,7 @@ interface EditPaymentModalProps {
 }
 
 export function EditPaymentModal({ isOpen, onClose, payment, onUpdate }: EditPaymentModalProps) {
-  const [formData, setFormData] = useState({ title: "", amount: "", session: "" });
+  const [formData, setFormData] = useState({ title: "", amount: "" });
 
   // Sync internal state whenever a new payment row context is loaded
   useEffect(() => {
@@ -33,22 +32,26 @@ export function EditPaymentModal({ isOpen, onClose, payment, onUpdate }: EditPay
       setFormData({
         title: payment.title,
         amount: cleanAmount,
-        session: payment.session,
       });
     }
   }, [payment]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!payment || !formData.title || !formData.amount || !formData.session) return;
+    if (!payment || !formData.title || !formData.amount) return;
+
+    const parsedNum = parseFloat(formData.amount.replace(/,/g, ""));
+    if (isNaN(parsedNum)) return;
 
     // Convert flat numbers back into consistent visual currency notation strings
-    const formattedAmount = `₦${parseFloat(formData.amount.replace(/,/g, "")).toLocaleString()}`;
+    const formattedAmount = `₦${parsedNum.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
 
     onUpdate({
       ...payment,
-      title: formData.title,
-      session: formData.session,
+      title: formData.title.trim(),
       amount: formattedAmount,
     });
   };
@@ -76,21 +79,6 @@ export function EditPaymentModal({ isOpen, onClose, payment, onUpdate }: EditPay
           />
         </div>
 
-        {/* Typed Academic Session Field */}
-        <div className="space-y-1.5">
-          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-            Academic Session
-          </label>
-          <input
-            type="text"
-            required
-            placeholder="e.g., 2026/2027"
-            value={formData.session}
-            onChange={(e) => setFormData({ ...formData, session: e.target.value })}
-            className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-slate-300 focus:bg-white transition"
-          />
-        </div>
-
         {/* Amount Field */}
         <div className="space-y-1.5">
           <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
@@ -100,6 +88,7 @@ export function EditPaymentModal({ isOpen, onClose, payment, onUpdate }: EditPay
             <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">₦</span>
             <input
               type="number"
+              step="0.01"
               required
               value={formData.amount}
               onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
@@ -118,7 +107,6 @@ export function EditPaymentModal({ isOpen, onClose, payment, onUpdate }: EditPay
 
         {/* Action Buttons */}
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-          {/* Swapped custom raw layout elements for uniform, system-wide atom components */}
           <Button 
             variant="white" 
             type="button" 

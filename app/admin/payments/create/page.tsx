@@ -17,15 +17,14 @@ interface CreatedPaymentItem {
   id: string;
   title: string;
   amount: string;
-  session: string;
   action: string;
 }
 
 const MOCK_CREATED_PAYMENTS: CreatedPaymentItem[] = [
-  { id: "1", title: "Course Registration Fee", amount: "₦20,000", session: "2026/2027", action: "" },
-  { id: "2", title: "Hostel Accommodation Fee", amount: "₦125,000", session: "2026/2027", action: "" },
-  { id: "3", title: "Departmental T-Shirt & ID Card", amount: "₦7,500", session: "2026/2027", action: "" },
-  { id: "4", title: "NACOS Annual Dues", amount: "₦2,000", session: "2025/2026", action: "" },
+  { id: "1", title: "Course Registration Fee", amount: "₦20,000.00", action: "" },
+  { id: "2", title: "Hostel Accommodation Fee", amount: "₦125,000.00", action: "" },
+  { id: "3", title: "Departmental T-Shirt & ID Card", amount: "₦7,500.00", action: "" },
+  { id: "4", title: "NACOS Annual Dues", amount: "₦2,000.00", action: "" },
 ];
 
 export default function CreatePaymentPage() {
@@ -43,7 +42,7 @@ export default function CreatePaymentPage() {
   const [selectedPayment, setSelectedPayment] = useState<CreatedPaymentItem | null>(null);
 
   // Modal Configuration Form Local State Fields
-  const [formData, setFormData] = useState({ title: "", amount: "", session: "2026/2027" });
+  const [formData, setFormData] = useState({ title: "", amount: "" });
 
   const filteredRecords = paymentRecords.filter((rec) =>
     rec.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -55,13 +54,18 @@ export default function CreatePaymentPage() {
     e.preventDefault();
     if (!formData.title || !formData.amount) return;
 
-    const formattedAmount = `₦${parseFloat(formData.amount.replace(/,/g, "")).toLocaleString()}`;
+    const parsedNum = parseFloat(formData.amount.replace(/,/g, ""));
+    if (isNaN(parsedNum)) return;
+
+    const formattedAmount = `₦${parsedNum.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
     
     const newRecord: CreatedPaymentItem = {
       id: String(paymentRecords.length + 1),
-      title: formData.title,
+      title: formData.title.trim(),
       amount: formattedAmount,
-      session: formData.session,
       action: ""
     };
 
@@ -71,7 +75,7 @@ export default function CreatePaymentPage() {
     setToastMsg(`"${formData.title}" has been successfully configured and activated.`);
     setIsToastOpen(true);
     
-    setFormData({ title: "", amount: "", session: "2026/2027" });
+    setFormData({ title: "", amount: "" });
   };
 
   // Execution Pipeline for Handling Updates from the Edit Modal
@@ -127,7 +131,6 @@ export default function CreatePaymentPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Reusable primary button for core workspace actions */}
             <Button 
               icon={PlusCircle} 
               variant="default" 
@@ -147,7 +150,6 @@ export default function CreatePaymentPage() {
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
-            {/* Swapped with the reusable custom search framework */}
             <SearchInput 
               placeholder="Search payments..."
               value={searchQuery}
@@ -172,7 +174,6 @@ export default function CreatePaymentPage() {
                 <tr className="border-b border-slate-100 bg-slate-50/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider select-none">
                   <th className="py-3.5 px-5">S/N</th>
                   <th className="py-3.5 px-5">Title</th>
-                  <th className="py-3.5 px-5">Session</th>
                   <th className="py-3.5 px-5">Amount</th>
                   <th className="py-3.5 px-5">Action</th>
                 </tr>
@@ -187,15 +188,11 @@ export default function CreatePaymentPage() {
                       <td className="py-4 px-5 font-bold text-slate-800 max-w-xs truncate">
                         {item.title}
                       </td>
-                      <td className="py-4 px-5 font-medium text-slate-500">
-                        {item.session}
-                      </td>
                       <td className="py-4 px-5 font-extrabold text-emerald-800 text-[13px]">
                         {item.amount}
                       </td>
                       <td className="py-4 px-5">
                         <div className="flex items-center gap-2">
-                          {/* Reusable variant matching operational themes perfectly */}
                           <IconButton
                             icon={Edit2}
                             variant="default"
@@ -214,7 +211,7 @@ export default function CreatePaymentPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="text-center py-12 font-medium text-slate-400">
+                    <td colSpan={4} className="text-center py-12 font-medium text-slate-400">
                       No matching payment configurations found.
                     </td>
                   </tr>
@@ -256,24 +253,10 @@ export default function CreatePaymentPage() {
               <input
                 type="text"
                 required
-                placeholder="e.g., 2026/2027 Second Semester Tuition"
+                placeholder="e.g., Second Semester Tuition"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-slate-300 focus:bg-white transition"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                Academic Session
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g., 2026/2027"
-                value={formData.session}
-                onChange={(e) => setFormData({ ...formData, session: e.target.value })}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-slate-300 focus:bg-white transition"
               />
             </div>
 
@@ -285,6 +268,7 @@ export default function CreatePaymentPage() {
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">₦</span>
                 <input
                   type="number"
+                  step="0.01"
                   required
                   placeholder="0.00"
                   value={formData.amount}
@@ -302,7 +286,6 @@ export default function CreatePaymentPage() {
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-              {/* Atomic cancel option layout button */}
               <Button 
                 variant="white" 
                 type="button" 
@@ -310,7 +293,6 @@ export default function CreatePaymentPage() {
               >
                 Cancel
               </Button>
-              {/* Atomic structural form publish trigger */}
               <Button 
                 variant="default" 
                 type="submit"

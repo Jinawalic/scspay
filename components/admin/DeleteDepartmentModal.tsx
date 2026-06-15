@@ -4,10 +4,14 @@ import React from "react";
 import { AlertCircle } from "lucide-react";
 import { ModalShell } from "@/components/admin/ModalShell";
 
+// Import your reusable atomic components
+import { Button } from "@/components/admin/Button";
+
 interface CreatedDepartmentItem {
   id: string;
   code: string;
   title: string;
+  faculty: string; // 💡 Synced to match the updated system schema
 }
 
 interface DeleteDepartmentModalProps {
@@ -26,21 +30,23 @@ export function DeleteDepartmentModal({ isOpen, onClose, onConfirm, targetDept }
           This structural unit deconfiguration cannot be reverted and will sever tracking metrics across student registries.
         </p>
         
+        {/* Modal Action Footers */}
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-          <button
-            type="button"
+          {/* Swapped for uniform workspace components */}
+          <Button 
+            variant="white" 
+            type="button" 
             onClick={onClose}
-            className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl border border-slate-200 transition"
           >
             Cancel
-          </button>
-          <button 
+          </Button>
+          <Button 
+            variant="rose" 
             type="button" 
-            onClick={onConfirm} 
-            className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition"
+            onClick={onConfirm}
           >
             Confirm Delete
-          </button>
+          </Button>
         </div>
       </div>
     </ModalShell>

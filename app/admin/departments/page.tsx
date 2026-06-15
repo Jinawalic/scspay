@@ -10,7 +10,7 @@ import { ToastNotification } from "@/components/admin/ToastNotification";
 import { EditDepartmentModal } from "@/components/admin/EditDepartmentModal";
 import { DeleteDepartmentModal } from "@/components/admin/DeleteDepartmentModal";
 
-// Import your reusable atomic components
+// Reusable atomic workflow component layers
 import { Button } from "@/components/admin/Button";
 import { IconButton } from "@/components/admin/IconButton";
 import { SearchInput } from "@/components/admin/SearchInput";
@@ -19,13 +19,14 @@ interface CreatedDepartmentItem {
   id: string;
   code: string;
   title: string;
+  faculty: string; // Updated from session to faculty
 }
 
 const MOCK_CREATED_DEPARTMENTS: CreatedDepartmentItem[] = [
-  { id: "1", code: "CMP", title: "Computer Science" },
-  { id: "2", code: "MTH", title: "Mathematics & Statistics" },
-  { id: "3", code: "PHY", title: "Physics with Electronics" },
-  { id: "4", code: "CHM", title: "Pure and Applied Chemistry" },
+  { id: "1", code: "CMP", title: "Computer Science", faculty: "Faculty of Science" },
+  { id: "2", code: "MTH", title: "Mathematics & Statistics", faculty: "Faculty of Science" },
+  { id: "3", code: "PHY", title: "Physics with Electronics", faculty: "Faculty of Science" },
+  { id: "4", code: "CHM", title: "Pure and Applied Chemistry", faculty: "Faculty of Science" },
 ];
 
 export default function CreateDepartmentPage() {
@@ -34,7 +35,7 @@ export default function CreateDepartmentPage() {
 
   // Create Modal Interactivity States
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ title: "", code: "", session: "", capacity: "" });
+  const [formData, setFormData] = useState({ title: "", code: "", faculty: "" });
 
   // Edit Modular Interactivity Pipeline States
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -56,24 +57,26 @@ export default function CreateDepartmentPage() {
   const filteredRecords = departmentRecords.filter((rec) =>
     rec.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     rec.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    rec.faculty.toLowerCase().includes(searchQuery.toLowerCase()) ||
     rec.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Form Creation Core Handlers
   const handleCreateDepartment = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.code || !formData.session) return;
+    if (!formData.title || !formData.code || !formData.faculty) return;
 
     const newRecord: CreatedDepartmentItem = {
       id: String(departmentRecords.length + 1),
       code: formData.code.trim().toUpperCase(),
       title: formData.title.trim(),
+      faculty: formData.faculty.trim(),
     };
 
     setDepartmentRecords([newRecord, ...departmentRecords]);
     setIsModalOpen(false);
     triggerToast(`Department of "${formData.title}" has been successfully initialized.`);
-    setFormData({ title: "", code: "", session: "", capacity: "" });
+    setFormData({ title: "", code: "", faculty: "" });
   };
 
   // Dedicated Pipeline Save Callback Function Engine 
@@ -104,12 +107,11 @@ export default function CreateDepartmentPage() {
               Departmental Management
             </h1>
             <p className="text-xs font-semibold text-slate-400">
-              Configure academic branches, assign registration tracking rules, and review current session structural footprints.
+              Configure academic branches, assign registration tracking rules, and review faculty structural footprints.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Reusable atomic button layout instance */}
             <Button 
               icon={PlusCircle} 
               variant="default" 
@@ -129,9 +131,8 @@ export default function CreateDepartmentPage() {
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
-            {/* Standardized search input layer component */}
             <SearchInput 
-              placeholder="Search departments or codes..."
+              placeholder="Search departments, faculties or codes..."
               value={searchQuery}
               onChange={(value) => setSearchQuery(value)}
             />
@@ -155,6 +156,7 @@ export default function CreateDepartmentPage() {
                   <th className="py-3.5 px-5">S/N</th>
                   <th className="py-3.5 px-5">Code</th>
                   <th className="py-3.5 px-5">Department</th>
+                  <th className="py-3.5 px-5">Faculty</th> {/* Added Faculty column */}
                   <th className="py-3.5 px-5">Action</th>
                 </tr>
               </thead>
@@ -173,9 +175,11 @@ export default function CreateDepartmentPage() {
                       <td className="py-4 px-5 font-bold text-slate-800 max-w-xs truncate">
                         {item.title}
                       </td>
+                      <td className="py-4 px-5 text-slate-600 font-medium">
+                        {item.faculty} {/* Rendered Faculty item dynamically */}
+                      </td>
                       <td className="py-4 px-5">
                         <div className="flex items-center gap-2">
-                          {/* Atomic interactive actions built to inherit table schema patterns */}
                           <IconButton
                             icon={Edit2}
                             variant="default"
@@ -194,7 +198,7 @@ export default function CreateDepartmentPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="text-center py-12 font-medium text-slate-400">
+                    <td colSpan={5} className="text-center py-12 font-medium text-slate-400">
                       No matching departmental records located.
                     </td>
                   </tr>
@@ -259,17 +263,18 @@ export default function CreateDepartmentPage() {
               </div>
             </div>
 
+            {/* Replaced Session Configuration layout block with Faculty field configuration */}
             <div className="space-y-1.5">
               <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                Academic Session
+                Faculty
               </label>
               <input
                 type="text"
                 required
-                placeholder="e.g., 2026/2027"
-                value={formData.session}
-                onChange={(e) => setFormData({ ...formData, session: e.target.value })}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-slate-300 focus:bg-white transition"
+                placeholder="e.g., Faculty of Natural Sciences"
+                value={formData.faculty}
+                onChange={(e) => setFormData({ ...formData, faculty: e.target.value })}
+                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 placeholder-slate-300 focus:outline-none focus:border-slate-300 focus:bg-white transition"
               />
             </div>
 
@@ -281,7 +286,6 @@ export default function CreateDepartmentPage() {
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-              {/* Atomic overlay controls */}
               <Button 
                 variant="white" 
                 type="button" 

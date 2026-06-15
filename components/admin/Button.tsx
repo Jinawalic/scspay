@@ -5,7 +5,7 @@ import { LucideIcon } from "lucide-react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: LucideIcon;
-  variant?: "default" | "white" | "emerald";
+  variant?: "default" | "white" | "emerald" | "rose"; // 💡 Added "rose" to the type definition
 }
 
 export function Button({ 
@@ -20,6 +20,7 @@ export function Button({
     default: "text-white bg-emerald-800 border border-slate-200 hover:bg-emerald-900",
     white: "text-slate-700 bg-white border border-slate-200 hover:bg-slate-50",
     emerald: "text-white bg-emerald-800 hover:bg-emerald-900 border border-transparent",
+    rose: "text-white bg-rose-600 hover:bg-rose-700 border border-transparent", // 💡 Now perfectly typed
   };
 
   return (
