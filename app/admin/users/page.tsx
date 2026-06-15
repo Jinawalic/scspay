@@ -23,7 +23,7 @@ import { IconButton } from "@/components/admin/IconButton";
 import { Button } from "@/components/admin/Button";
 
 interface UserData {
-  id: number;
+  id: string;
   role: string;
   fullName: string;
   matricNumber: string;
@@ -47,10 +47,21 @@ export default function UserManagementPage() {
 
     const load = async () => {
       try {
-        const res = await fetch("/api/admin/students", { cache: "no-store" });
+        const res = await fetch("/api/admin/users", { cache: "no-store" });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error ?? "Unable to load users");
-        if (isMounted) setUsers(data.students ?? []);
+        if (isMounted) {
+          const mappedUsers = (data.users ?? []).map((u: any) => ({
+            id: u.id,
+            role: u.role || "Student",
+            fullName: u.fullName || "",
+            matricNumber: u.matricNumber || "",
+            department: u.department || "",
+            phone: u.phone || "",
+            dateCreated: u.createdAt || "",
+          }));
+          setUsers(mappedUsers);
+        }
       } catch (err) {
         if (isMounted) setLoadError(err instanceof Error ? err.message : "Unable to load users");
       } finally {

@@ -10,25 +10,21 @@ import { ToastNotification, ToastType } from "@/components/admin/ToastNotificati
 // Reusable atomic workflow component layers
 import { Button } from "@/components/admin/Button";
 
-const INITIAL_TRANSACTIONS: TransactionItem[] = [
-  { id: "#TRX-2389", customer: "Alex Johnson", date: "Jan 12, 2023", product: "Tshirt", amount: "$45.00", status: "Completed" },
-  { id: "#TRX-2388", customer: "Sarah Miller", date: "Feb 22, 2023", product: "Covid restrictions", amount: "$99.00", status: "Completed" },
-  { id: "#TRX-2387", customer: "David Chen", date: "Feb 18, 2024", product: "Feb 18, 2024", amount: "$22.99", status: "Pending" },
-  { id: "#TRX-2386", customer: "Emma Wilson", date: "May 17, 2024", product: "May 17, 2024", amount: "$35.00", status: "Completed" },
-  { id: "#TRX-2385", customer: "Paula Mora", date: "June 25, 2024", product: "June 25, 2024", amount: "$89.00", status: "Pending" },
-];
-
 export default function AdminDashboardPage() {
-  const [transactions, setTransactions] = useState<TransactionItem[]>(INITIAL_TRANSACTIONS);
+  const [transactions, setTransactions] = useState<TransactionItem[]>([]);
+  const [studentsCount, setStudentsCount] = useState<number>(0);
+  const [paymentsCount, setPaymentsCount] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   
   // Dashboard Session Managing States
-  const [currentSession, setCurrentSession] = useState("2026/2027");
-  const [sessionInputValue, setSessionInputValue] = useState("2026/2027");
+  const [currentSession, setCurrentSession] = useState("2025/2026");
+  const [sessionInputValue, setSessionInputValue] = useState("2025/2026");
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
   const popoverRef = useRef<HTMLDivElement>(null);
-
+  
   // Reusable System Toast state structure
   const [toast, setToast] = useState<{ isOpen: boolean; message: string; type: ToastType }>({
     isOpen: false,
@@ -39,6 +35,35 @@ export default function AdminDashboardPage() {
   const triggerToast = (message: string, type: ToastType = "success") => {
     setToast({ isOpen: true, message, type });
   };
+
+  // Load dashboard stats from API
+  useEffect(() => {
+    let isMounted = true;
+
+    const load = async () => {
+      try {
+        const res = await fetch("/api/admin/dashboard", { cache: "no-store" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error ?? "Unable to load dashboard data");
+        if (isMounted) {
+          setTransactions(data.recentTransactions ?? []);
+          setStudentsCount(data.studentsCount ?? 0);
+          setPaymentsCount(data.paymentsCount ?? 0);
+          if (data.currentSession) {
+            setCurrentSession(data.currentSession);
+            setSessionInputValue(data.currentSession);
+          }
+        }
+      } catch (err) {
+        if (isMounted) setLoadError(err instanceof Error ? err.message : "Unable to load dashboard data");
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    void load();
+    return () => { isMounted = false; };
+  }, []);
 
   // Close the mini card context wrapper automatically if clicking outside
   useEffect(() => {
@@ -71,7 +96,7 @@ export default function AdminDashboardPage() {
   const metricsData = [
     { 
       title: "All Students", 
-      value: "1,234", 
+      value: isLoading ? "..." : studentsCount.toLocaleString(), 
       icon: User, 
       subtitle: "Platform registered students", 
       subtitleColor: "text-blue-500",
@@ -79,7 +104,7 @@ export default function AdminDashboardPage() {
     },
     { 
       title: "Payments Counts", 
-      value: "453", 
+      value: isLoading ? "..." : paymentsCount.toLocaleString(), 
       icon: CreditCard, 
       subtitle: "Successful transactions processed", 
       subtitleColor: "text-emerald-500",
@@ -187,10 +212,20 @@ export default function AdminDashboardPage() {
         {/* Payment History Data Header with Integrated Filter Options */}
         <div className="pt-4 flex flex-col space-y-3">
           <div className="pt-1 flex-1">
-            <TransactionTable 
-              transactions={filteredTransactions} 
-              onDelete={handleDeleteTransaction}
-            />
+            {isLoading ? (
+              <div className="w-full py-12 text-center text-slate-400 font-semibold text-sm border border-slate-200 rounded-xl bg-white shadow-sm">
+                Loading payment history...
+              </div>
+            ) : loadError ? (
+              <div className="w-full py-12 text-center text-rose-500 font-semibold text-sm border border-slate-200 rounded-xl bg-white shadow-sm">
+                {loadError}
+              </div>
+            ) : (
+              <TransactionTable 
+                transactions={filteredTransactions} 
+                onDelete={handleDeleteTransaction}
+              />
+            )}
           </div>
         </div>
       </div>

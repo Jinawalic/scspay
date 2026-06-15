@@ -10,8 +10,6 @@ import { Card } from "@/components/ui/card";
 type VerifiedStudent = {
   fullName: string;
   matricNumber: string | null;
-  faculty: string | null;
-  department: string | null;
 };
 
 type VerifiedTransaction = {
@@ -22,7 +20,6 @@ type VerifiedTransaction = {
   date: string;
   dateTime: string;
   status: "Successful" | "Pending" | "Failed";
-  session: string;
   description: string;
 };
 
@@ -181,10 +178,7 @@ export default function PaymentSuccessPage() {
                     { label: "Transaction ID", value: transaction?.receipt || reference || "-" },
                     { label: "Student Name", value: student?.fullName?.toUpperCase() || "-" },
                     { label: "Matric Number", value: student?.matricNumber || "-" },
-                    { label: "Faculty", value: student?.faculty || "-" },
-                    { label: "Department", value: student?.department || "-" },
                     { label: "Payment Type", value: transaction?.type || "-" },
-                    { label: "Session", value: transaction?.session || "-" },
                     { label: "Date & Time", value: transaction?.dateTime || transaction?.date || "-" },
                     { label: "Status", value: transaction?.status === "Successful" ? "Success" : (transaction?.status || "-"), valueClass: "text-[#135A3D] font-bold" },
                   ].map((row, i, arr) => (
