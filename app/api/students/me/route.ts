@@ -11,8 +11,8 @@ import { makeDepartmentCode, makeSlug } from "@/src/lib/academic";
 const updateProfileSchema = z.object({
   faculty: z.string().min(2, "Select your faculty"),
   department: z.string().min(2, "Select your department"),
-  level: z.string().min(1, "Select your level"),
-  phone: z.string().min(5, "Enter your phone number"),
+  level: z.string().optional(),
+  phone: z.string().optional(),
 });
 
 export async function GET() {
@@ -91,8 +91,8 @@ export async function PATCH(request: NextRequest) {
       data: {
         facultyId: savedFaculty.id,
         departmentId: savedDepartment.id,
-        level,
-        phone,
+        ...(level ? { level } : {}),
+        ...(phone ? { phone } : {}),
         completed: true,
       },
       include: {

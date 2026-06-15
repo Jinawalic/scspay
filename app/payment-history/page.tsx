@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   ChevronLeft,
@@ -18,7 +18,6 @@ import {
   TrendingUp,
   TrendingDown
 } from "lucide-react";
-import { recentTransactions } from "@/src/data/mock";
 import { DesktopSidebar } from "@/components/dashboard/DesktopSidebar";
 import { MobileBottomNav } from "@/components/dashboard/mobile-bottom-nav";
 import type { Transaction } from "@/src/types";
@@ -27,6 +26,10 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+
+type TransactionsResponse = {
+  transactions: Transaction[];
+};
 
 // Helper to parse dates like "05 JUN 2026" or "10/06/2026, 19:48:41"
 const parseDate = (dateStr: string): Date => {
@@ -77,6 +80,8 @@ export default function PaymentHistoryPage() {
   const [serviceFilter, setServiceFilter] = useState("All");
   const [methodFilter, setMethodFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [isDateOpen, setIsDateOpen] = useState(false);
   const [isServiceOpen, setIsServiceOpen] = useState(false);
@@ -103,22 +108,59 @@ export default function PaymentHistoryPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadTransactions = async () => {
+      try {
+        const response = await fetch("/api/students/payments", {
+          cache: "no-store",
+        });
+        const payload = (await response.json().catch(() => ({}))) as TransactionsResponse & { error?: string };
+
+        if (!response.ok) {
+          throw new Error(payload.error || "Unable to load payment history");
+        }
+
+        if (isMounted) {
+          setTransactions(payload.transactions ?? []);
+        }
+      } catch {
+        if (isMounted) {
+          setTransactions([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadTransactions();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const handleTransactionClick = (receipt: string) => {
     window.open(`/receipt/${receipt}?print=1`, "_blank", "noopener,noreferrer");
   };
 
   // Filter logic
-  const filteredTransactions = recentTransactions.filter((tx) => {
+  const serviceOptions = useMemo(() => {
+    return ["All", ...Array.from(new Set(transactions.map((tx) => tx.type)))];
+  }, [transactions]);
+
+  const filteredTransactions = transactions.filter((tx) => {
     // 1. Service/Type filter
     if (serviceFilter !== "All" && tx.type !== serviceFilter) {
       return false;
     }
 
     // 2. Method filter (mock representation)
-    if (methodFilter !== "All") {
-      if (methodFilter === "Paystack" && !tx.receipt.startsWith("T")) {
-        return false;
-      }
+    if (methodFilter !== "All" && methodFilter === "Paystack") {
+      return true;
     }
 
     // 3. Desktop Search Box Input Filter
@@ -343,7 +385,7 @@ export default function PaymentHistoryPage() {
 
                     {isServiceOpen && (
                       <div className="absolute left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:right-0 mt-2 z-50 w-56 rounded-2xl bg-white border border-slate-100 p-1.5 flex flex-col gap-0.5">
-                        {["All", "School Fees", "Course Registration", "Hostel Fees", "T-Shirt / ID Card"].map((opt) => (
+                        {serviceOptions.map((opt) => (
                           <button
                             key={opt}
                             onClick={() => {
@@ -380,7 +422,16 @@ export default function PaymentHistoryPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100/60 text-sm font-medium text-slate-700">
-                  {sortedTransactions.length > 0 ? (
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={6} className="py-12">
+                        <EmptyState
+                          title="Loading transactions"
+                          description="Please wait while we fetch your payment records."
+                        />
+                      </td>
+                    </tr>
+                  ) : sortedTransactions.length > 0 ? (
                     sortedTransactions.map((tx) => {
                       return (
                         <tr key={tx.id} className="hover:bg-slate-50/60 transition-colors group">
@@ -460,7 +511,12 @@ export default function PaymentHistoryPage() {
             {/* MOBILE VIEW LIST LAYOUT                    */}
             {/* ========================================== */}
             <div className="md:hidden flex-1 flex flex-col gap-4">
-              {sortedTransactions.length > 0 ? (
+              {isLoading ? (
+                <EmptyState
+                  title="Loading transactions"
+                  description="Please wait while we fetch your payment records."
+                />
+              ) : sortedTransactions.length > 0 ? (
                 <div className="flex flex-col">
                   {sortedTransactions.map((tx, idx, arr) => {
                     const theme = getCategoryTheme(tx.type);

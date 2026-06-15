@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, ChevronDown, Check } from "lucide-react";
+import { X, ChevronDown, Check, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
@@ -21,7 +21,7 @@ type FacultyOption = {
 type RegistrationModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onComplete: (faculty: string, department: string) => void;
+  onComplete: () => void;
 };
 
 export function RegistrationModal({
@@ -35,7 +35,9 @@ export function RegistrationModal({
   const [isDepartmentOpen, setIsDepartmentOpen] = useState(false);
   const [faculties, setFaculties] = useState<FacultyOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [loadError, setLoadError] = useState("");
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
     if (isOpen) {
@@ -59,6 +61,7 @@ export function RegistrationModal({
     const loadAcademicOptions = async () => {
       setIsLoading(true);
       setLoadError("");
+      setSaveError("");
 
       try {
         const response = await fetch("/api/admin/departments", {
@@ -99,7 +102,11 @@ export function RegistrationModal({
         if (!isMounted) return;
 
         setFaculties(nextFaculties);
-        setSelectedFaculty((current) => (nextFaculties.some((faculty) => faculty.id === current) ? current : nextFaculties[0]?.id || ""));
+        setSelectedFaculty((current) =>
+          nextFaculties.some((faculty) => faculty.id === current)
+            ? current
+            : nextFaculties[0]?.id || ""
+        );
         setSelectedDepartment("");
       } catch (error) {
         if (!isMounted) return;
@@ -133,10 +140,34 @@ export function RegistrationModal({
     setIsDepartmentOpen(false);
   };
 
-  const handleSubmit = () => {
-    if (selectedFacultyData && selectedDepartment) {
-      onComplete(selectedFacultyData.name, selectedDepartment);
+  const handleSubmit = async () => {
+    if (!selectedFacultyData || !selectedDepartment) return;
+
+    setIsSaving(true);
+    setSaveError("");
+
+    try {
+      const response = await fetch("/api/students/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          faculty: selectedFacultyData.name,
+          department: selectedDepartment,
+        }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload?.error || "Unable to save your selection");
+      }
+
       onClose();
+      onComplete();
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Unable to save your selection. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -166,6 +197,7 @@ export function RegistrationModal({
             type="button"
             onClick={onClose}
             variant="ghost"
+            disabled={isSaving}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
           >
             <X className="h-5 w-5" />
@@ -182,6 +214,12 @@ export function RegistrationModal({
           </p>
         )}
 
+        {saveError && (
+          <p className="mb-4 rounded-xl bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-600">
+            {saveError}
+          </p>
+        )}
+
         <div className="mb-6">
           <label className="block text-sm font-semibold text-[#1E2E42] mb-2">
             Faculty
@@ -190,7 +228,7 @@ export function RegistrationModal({
             <button
               type="button"
               onClick={() => setIsFacultyOpen(!isFacultyOpen)}
-              disabled={isLoading || faculties.length === 0}
+              disabled={isLoading || isSaving || faculties.length === 0}
               className="w-full flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-left hover:border-slate-300 transition-colors disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
             >
               <span className="text-sm font-medium text-[#1E2E42]">
@@ -233,9 +271,9 @@ export function RegistrationModal({
             <button
               type="button"
               onClick={() => setIsDepartmentOpen(!isDepartmentOpen)}
-              disabled={!selectedFaculty || isLoading}
+              disabled={!selectedFaculty || isLoading || isSaving}
               className={`w-full flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors ${
-                !selectedFaculty || isLoading
+                !selectedFaculty || isLoading || isSaving
                   ? "border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed"
                   : "border-slate-200 bg-white hover:border-slate-300"
               }`}
@@ -248,7 +286,7 @@ export function RegistrationModal({
               <ChevronDown
                 className={`h-4 w-4 transition-transform ${
                   isDepartmentOpen ? "rotate-180" : ""
-                } ${!selectedFaculty || isLoading ? "text-slate-300" : "text-slate-400"}`}
+                } ${!selectedFaculty || isLoading || isSaving ? "text-slate-300" : "text-slate-400"}`}
               />
             </button>
 
@@ -283,10 +321,11 @@ export function RegistrationModal({
         <Button
           type="button"
           onClick={handleSubmit}
-          disabled={!selectedFaculty || !selectedDepartment || isLoading}
-          className="w-full rounded-full bg-[#135A3D] py-4 text-sm font-bold text-white shadow-md shadow-emerald-950/10 hover:bg-[#0E5C46] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          disabled={!selectedFaculty || !selectedDepartment || isLoading || isSaving}
+          className="w-full rounded-full bg-[#135A3D] py-4 text-sm font-bold text-white shadow-md shadow-emerald-950/10 hover:bg-[#0E5C46] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
         >
-          Complete Registration
+          {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+          {isSaving ? "Saving..." : "Complete Registration"}
         </Button>
       </motion.div>
     </motion.div>

@@ -1,17 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Receipt } from "lucide-react";
-import { recentTransactions } from "@/src/data/mock";
 import { TransactionCard } from "./TransactionCard";
 import { RecentTransactionTable } from "./RecentTransactionTable";
 import { AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
+import type { Transaction } from "@/src/types";
+
+type TransactionsResponse = {
+  transactions: Transaction[];
+};
 
 export function RecentTransactions() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [transactions, setTransactions] = useState(recentTransactions);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadTransactions = async () => {
+      try {
+        const response = await fetch("/api/students/payments", {
+          cache: "no-store",
+        });
+        const payload = (await response.json().catch(() => ({}))) as TransactionsResponse & { error?: string };
+
+        if (!response.ok) {
+          throw new Error(payload.error || "Unable to load transactions");
+        }
+
+        if (isMounted) {
+          setTransactions(payload.transactions ?? []);
+        }
+      } catch {
+        if (isMounted) {
+          setTransactions([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadTransactions();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Filter transactions based on search query
   const filteredTransactions = transactions.filter((transaction) => {
@@ -64,7 +104,11 @@ export function RecentTransactions() {
 
       {/* Transactions List (mobile only) */}
       <div className="md:hidden flex flex-col gap-4">
-        {filteredTransactions.length > 0 ? (
+        {isLoading ? (
+          <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm font-medium text-slate-400">
+            Loading recent transactions...
+          </div>
+        ) : filteredTransactions.length > 0 ? (
           <AnimatePresence mode="popLayout">
             {filteredTransactions.map((transaction) => (
               <TransactionCard

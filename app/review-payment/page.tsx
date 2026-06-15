@@ -106,22 +106,21 @@ function ReviewPaymentContent() {
   const handlePay = async () => {
     setIsProcessing(true);
     try {
-      const res = await fetch("/api/paystack/initialize", {
+      const res = await fetch("/api/students/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: "student@scspay.ng",
-          amount: paymentDetails.amount,
-          metadata: {
-            payment_type: paymentDetails.name,
-            selected_item: paymentDetails.name,
-          },
+          feeItemId: paymentDetails.id,
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok || !data.authorizationUrl) {
+        if (res.status === 401) {
+          window.location.href = "/";
+          return;
+        }
         throw new Error(data.error ?? "Failed to initialize payment");
       }
 

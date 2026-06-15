@@ -1,16 +1,90 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ShieldCheck, Shirt, History, AlertCircle } from "lucide-react";
 import { RegistrationModal } from "./RegistrationModal";
 
 export function QuickActions() {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProfileComplete, setIsProfileComplete] = useState<boolean | null>(null);
 
-  const handleRegistrationComplete = (faculty: string, department: string) => {
-    console.log("Registration completed:", { faculty, department });
-    window.location.href = "/make-payment";
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadStudentStatus = async () => {
+      try {
+        const response = await fetch("/api/students/me", {
+          cache: "no-store",
+        });
+
+        if (response.status === 401) {
+          if (isMounted) {
+            setIsProfileComplete(false);
+          }
+          return;
+        }
+
+        const payload = await response.json().catch(() => ({}));
+
+        if (isMounted && response.ok) {
+          setIsProfileComplete(Boolean(payload?.student?.completed));
+        }
+      } catch {
+        if (isMounted) {
+          setIsProfileComplete(false);
+        }
+      }
+    };
+
+    void loadStudentStatus();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleRegistrationComplete = () => {
+    setIsProfileComplete(true);
+    router.push("/make-payment");
+  };
+
+  const handleMakePaymentClick = async () => {
+    if (isProfileComplete === true) {
+      router.push("/make-payment");
+      return;
+    }
+
+    if (isProfileComplete === false) {
+      setIsModalOpen(true);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/students/me", {
+        cache: "no-store",
+      });
+
+      if (response.status === 401) {
+        router.push("/");
+        return;
+      }
+
+      const payload = await response.json().catch(() => ({}));
+      const completed = Boolean(payload?.student?.completed);
+
+      setIsProfileComplete(completed);
+
+      if (completed) {
+        router.push("/make-payment");
+      } else {
+        setIsModalOpen(true);
+      }
+    } catch {
+      setIsModalOpen(true);
+    }
   };
 
   const actions = [
@@ -44,7 +118,7 @@ export function QuickActions() {
             return (
               <button
                 key={index}
-                onClick={() => setIsModalOpen(true)}
+                onClick={handleMakePaymentClick}
                 className="group flex flex-col items-center justify-center rounded-xl border border-slate-100/80 bg-white p-6 border-slate-200 transition-all duration-200 hover:scale-[1.02] hover:hover:bg-white active:scale-[0.98]"
               >
                 <div

@@ -1,41 +1,84 @@
-"use client";
-
-import { useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import Link from "next/link";
-import { recentTransactions, studentProfile } from "@/src/data/mock";
+import { redirect } from "next/navigation";
+import prisma from "@/src/lib/prisma";
+import { getCurrentStudent } from "@/src/lib/student-auth";
+import { formatPaymentDateTime } from "@/src/lib/payment-flow";
 
 // ---------- Auto-print wrapper ----------
-function AutoPrint() {
-  const searchParams = useSearchParams();
-  useEffect(() => {
-    if (searchParams.get("print") === "1") {
-      const t = setTimeout(() => window.print(), 500);
-      return () => clearTimeout(t);
-    }
-  }, [searchParams]);
-  return null;
+function AutoPrint({ print }: { print: string | null }) {
+  if (print !== "1") {
+    return null;
+  }
+
+  return (
+    <script
+      dangerouslySetInnerHTML={{
+        __html: `setTimeout(() => window.print(), 500);`,
+      }}
+    />
+  );
 }
 
 // ---------- Main page ----------
 export default async function ReceiptPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ print?: string }>;
 }) {
-  const { id } = await params;
-  const tx =
-    recentTransactions.find((t) => t.receipt === id) ?? recentTransactions[0];
+  const [{ id }, query] = await Promise.all([params, searchParams]);
+  const student = await getCurrentStudent();
+
+  if (!student) {
+    redirect("/");
+  }
+
+  const payment = await prisma.paymentTransaction.findFirst({
+    where: {
+      userId: student.id,
+      OR: [{ receipt: id }, { reference: id }],
+    },
+    include: {
+      feeItem: true,
+      user: {
+        include: {
+          faculty: true,
+          department: true,
+        },
+      },
+    },
+  });
+
+  if (!payment) {
+    return (
+      <main className="min-h-screen bg-[#F0F2F5] flex items-center justify-center px-4">
+        <div className="rounded-2xl bg-white px-6 py-8 text-center shadow-sm border border-slate-200 max-w-md w-full">
+          <p className="text-lg font-bold text-[#1E2E42]">Receipt not found</p>
+          <p className="mt-2 text-sm text-slate-500">We could not find a payment record for this reference.</p>
+          <Link
+            href="/dashboard"
+            className="mt-6 inline-flex rounded-full bg-[#135A3D] px-5 py-2.5 text-sm font-bold text-white"
+          >
+            Back to dashboard
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   const rows = [
-    { label: "TRANSACTION ID", value: tx.receipt },
-    { label: "STUDENT NAME", value: studentProfile.fullName.toUpperCase() },
-    { label: "MATRIC NUMBER", value: studentProfile.matricNumber },
-    { label: "PAYMENT TYPE", value: tx.type },
-    { label: "DATE & TIME", value: tx.date },
+    { label: "TRANSACTION ID", value: payment.receipt },
+    { label: "STUDENT NAME", value: student.fullName.toUpperCase() },
+    { label: "MATRIC NUMBER", value: student.matricNumber ?? "-" },
+    { label: "FACULTY", value: student.faculty?.name ?? "-" },
+    { label: "DEPARTMENT", value: student.department?.name ?? "-" },
+    { label: "PAYMENT TYPE", value: payment.feeItem?.name ?? payment.type },
+    { label: "DATE & TIME", value: formatPaymentDateTime(payment.paidAt) },
     {
       label: "PAYMENT STATUS",
-      value: tx.status === "Successful" ? "PAID" : tx.status.toUpperCase(),
+      value: payment.status === "Successful" ? "PAID" : payment.status.toUpperCase(),
       green: true,
     },
   ];
@@ -43,7 +86,6 @@ export default async function ReceiptPage({
   return (
     <>
       <style>{`
-        /* ── Screen styles ── */
         #receipt-screen-wrapper {
           min-height: 100vh;
           background: #F0F2F5;
@@ -62,7 +104,6 @@ export default async function ReceiptPage({
           overflow: hidden;
         }
 
-        /* ── Print / PDF styles ── */
         @page {
           size: A4 portrait;
           margin: 0;
@@ -96,12 +137,10 @@ export default async function ReceiptPage({
       `}</style>
 
       <Suspense fallback={null}>
-        <AutoPrint />
+        <AutoPrint print={query.print ?? null} />
       </Suspense>
 
       <div id="receipt-screen-wrapper">
-
-        {/* Action buttons — hidden on print */}
         <div id="no-print" style={{ width: "100%", maxWidth: 400, marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Link
             href="/dashboard"
@@ -109,25 +148,21 @@ export default async function ReceiptPage({
           >
             ← Back
           </Link>
-          <button
-            onClick={() => window.print()}
-            style={{ borderRadius: 999, background: "#135A3D", color: "white", padding: "8px 20px", fontSize: 13, fontWeight: 700, border: "none", cursor: "pointer" }}
+          <Link
+            href={`/receipt/${id}?print=1`}
+            style={{ borderRadius: 999, background: "#135A3D", color: "white", padding: "8px 20px", fontSize: 13, fontWeight: 700, border: "none", cursor: "pointer", textDecoration: "none" }}
           >
             Download PDF
-          </button>
+          </Link>
         </div>
 
-        {/* ── RECEIPT CARD ── */}
         <div id="receipt-card">
-
-          {/* Punch-hole top border */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "8px 4px 0" }}>
             {Array.from({ length: 26 }).map((_, i) => (
               <div key={i} style={{ width: 9, height: 9, borderRadius: "50%", background: "#1E2E42", flexShrink: 0 }} />
             ))}
           </div>
 
-          {/* Header */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px 8px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <div style={{ width: 28, height: 28, borderRadius: "50%", border: "2.5px solid #135A3D", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -142,7 +177,6 @@ export default async function ReceiptPage({
             </span>
           </div>
 
-          {/* Watermark layer */}
           <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 0 }} aria-hidden>
             {Array.from({ length: 30 }).map((_, i) => (
               <span
@@ -164,23 +198,17 @@ export default async function ReceiptPage({
             ))}
           </div>
 
-          {/* Body */}
           <div style={{ position: "relative", zIndex: 1, padding: "8px 24px 16px" }}>
-
-            {/* Amount */}
             <p style={{ fontSize: 34, fontWeight: 900, color: "#135A3D", textAlign: "center", margin: "16px 0 4px", letterSpacing: "-0.5px" }}>
-              ₦{tx.amount.toLocaleString()}.00
+              ₦{payment.amount.toLocaleString()}.00
             </p>
 
-            {/* Status */}
             <p style={{ fontSize: 15, fontWeight: 700, color: "#1E2E42", textAlign: "center", margin: "0 0 4px" }}>
-              {tx.status === "Successful" ? "Successful" : tx.status}
+              {payment.status === "Successful" ? "Successful" : payment.status}
             </p>
 
-            {/* Dashed divider */}
             <div style={{ borderTop: "1.5px dashed #CBD5E1", margin: "16px 0" }} />
 
-            {/* Detail rows */}
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {rows.map(({ label, value, green }) => (
                 <div key={label} style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
@@ -194,26 +222,20 @@ export default async function ReceiptPage({
               ))}
             </div>
 
-            {/* Dashed divider */}
             <div style={{ borderTop: "1.5px dashed #CBD5E1", margin: "16px 0" }} />
 
-            {/* Footer */}
             <p style={{ marginTop: 20, fontSize: 9, lineHeight: 1.6, color: "#94A3B8", textAlign: "center" }}>
               This is an official receipt generated by SCS PAY. Please keep it for your records.
               For disputes, contact your department&apos;s financial office with this transaction ID.
             </p>
           </div>
 
-          {/* Punch-hole bottom border */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "0 4px 8px" }}>
             {Array.from({ length: 26 }).map((_, i) => (
               <div key={i} style={{ width: 9, height: 9, borderRadius: "50%", background: "#1E2E42", flexShrink: 0 }} />
             ))}
           </div>
-
         </div>
-        {/* end receipt card */}
-
       </div>
     </>
   );
