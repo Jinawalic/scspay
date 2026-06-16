@@ -114,7 +114,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Performance Metric Tracker Dynamic Cards Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {metricsData.map((metric) => (
             <MetricCard
               key={metric.title}
