@@ -30,6 +30,7 @@ interface UserData {
   department: string;
   phone: string;
   dateCreated: string;
+  password?: string;
 }
 
 export default function UserManagementPage() {
@@ -140,11 +141,32 @@ export default function UserManagementPage() {
     setIsEditModalOpen(true);
   };
 
-  const handleSaveEdit = (updatedUser: UserData) => {
-    setUsers((prev) => prev.map((u) => u.id === updatedUser.id ? updatedUser : u));
-    setIsEditModalOpen(false);
-    setSelectedUserForEdit(null);
-    triggerToast(`Successfully modified record settings for ${updatedUser.fullName}`, "success");
+  const handleSaveEdit = async (updatedUser: UserData) => {
+    try {
+      const res = await fetch(`/api/admin/users/${updatedUser.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          department: updatedUser.department,
+          password: updatedUser.password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error ?? "Unable to update user");
+      }
+
+      setUsers((prev) => prev.map((u) => u.id === updatedUser.id ? { ...updatedUser, ...data.user } : u));
+      setIsEditModalOpen(false);
+      setSelectedUserForEdit(null);
+      triggerToast(`Successfully modified record settings for ${updatedUser.fullName}`, "success");
+    } catch (err) {
+      triggerToast(err instanceof Error ? err.message : "Unable to update user", "error");
+    }
   };
 
   const columns = [

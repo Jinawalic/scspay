@@ -135,11 +135,34 @@ export default function CreateDepartmentPage() {
   };
 
   // Dedicated Pipeline Save Callback Function Engine 
-  const handleSaveEdit = (updatedDept: CreatedDepartmentItem) => {
-    setDepartmentRecords(prev => prev.map(item => item.id === updatedDept.id ? updatedDept : item));
-    setIsEditOpen(false);
-    setSelectedDept(null);
-    triggerToast(`Changes to "${updatedDept.title}" saved successfully.`);
+  const handleSaveEdit = async (updatedDept: CreatedDepartmentItem) => {
+    try {
+      const response = await fetch(`/api/admin/departments/${updatedDept.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code: updatedDept.code,
+          title: updatedDept.title,
+          faculty: updatedDept.faculty,
+        }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload?.error || "Unable to update department");
+      }
+
+      setDepartmentRecords(prev => prev.map(item => item.id === updatedDept.id ? { ...updatedDept, ...payload.department } : item));
+      setIsEditOpen(false);
+      setSelectedDept(null);
+      triggerToast(`Changes to "${updatedDept.title}" saved successfully.`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to update department";
+      triggerToast(message);
+    }
   };
 
   // Dedicated Pipeline Delete Callback Function Engine
