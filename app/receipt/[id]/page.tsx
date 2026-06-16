@@ -14,11 +14,19 @@ function AutoPrint({ print }: { print: string | null }) {
   return (
     <script
       dangerouslySetInnerHTML={{
-        __html: `setTimeout(() => window.print(), 500);`,
+        __html: `
+          setTimeout(() => {
+            window.print();
+            window.addEventListener('afterprint', () => {
+              window.close();
+            }, { once: true });
+          }, 500);
+        `,
       }}
     />
   );
 }
+
 
 // ---------- Main page ----------
 export default async function ReceiptPage({
@@ -150,6 +158,7 @@ export default async function ReceiptPage({
           </Link>
           <Link
             href={`/receipt/${id}?print=1`}
+            target="_blank"
             style={{ borderRadius: 999, background: "#135A3D", color: "white", padding: "8px 20px", fontSize: 13, fontWeight: 700, border: "none", cursor: "pointer", textDecoration: "none" }}
           >
             Download PDF
@@ -165,9 +174,11 @@ export default async function ReceiptPage({
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px 8px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <div style={{ width: 28, height: 28, borderRadius: "50%", border: "2.5px solid #135A3D", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#135A3D" }} />
-              </div>
+              <img
+                src="/images/logo.png"
+                alt="MyPay Logo"
+                style={{ height: 28, width: 28, borderRadius: "50%", objectFit: "contain" }}
+              />
               <span style={{ fontSize: 18, fontWeight: 900, color: "#1E2E42", letterSpacing: "-0.3px" }}>
                 My <span style={{ color: "#135A3D" }}>Pay</span>
               </span>

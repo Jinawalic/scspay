@@ -54,6 +54,7 @@ model User {
   passwordHash   String?
   phone          String?
   level          String?
+  avatar         String?
   completed      Boolean       @default(false)
   facultyId      String?
   faculty        Faculty?      @relation(fields: [facultyId], references: [id], onDelete: SetNull)
@@ -116,4 +117,12 @@ model PaymentTransaction {
   @@index([feeItemId])
   @@index([status])
   @@index([session])
+}
+
+model SessionSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

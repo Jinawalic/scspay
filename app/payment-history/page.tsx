@@ -60,8 +60,8 @@ const getGroupHeader = (dateStr: string): string => {
   const date = parseDate(dateStr);
   if (isNaN(date.getTime())) return dateStr;
 
-  // Set system "Today" to match June 10, 2026
-  const today = new Date(2026, 5, 10);
+  // Set system "Today" dynamically
+  const today = new Date();
   if (
     date.getDate() === today.getDate() &&
     date.getMonth() === today.getMonth() &&
@@ -74,6 +74,7 @@ const getGroupHeader = (dateStr: string): string => {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   return `${weekdays[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
 };
+
 
 export default function PaymentHistoryPage() {
   const [dateFilter, setDateFilter] = useState("All");
@@ -159,24 +160,27 @@ export default function PaymentHistoryPage() {
     }
 
     // 2. Method filter (mock representation)
-    if (methodFilter !== "All" && methodFilter === "Paystack") {
-      return true;
+    if (methodFilter !== "All" && methodFilter !== "Paystack") {
+      return false;
     }
 
-    // 3. Desktop Search Box Input Filter
+    // 3. Search Box Input Filter (dynamic across all text/number fields)
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       const matchQuery =
         tx.type.toLowerCase().includes(query) ||
         (tx.description && tx.description.toLowerCase().includes(query)) ||
-        tx.receipt.toLowerCase().includes(query);
+        tx.receipt.toLowerCase().includes(query) ||
+        tx.status.toLowerCase().includes(query) ||
+        tx.amount.toString().includes(query) ||
+        tx.date.toLowerCase().includes(query);
       if (!matchQuery) return false;
     }
 
     // 4. Date filter
     if (dateFilter !== "All") {
       const txDate = parseDate(tx.date);
-      const today = new Date(2026, 5, 10); // June 10, 2026
+      const today = new Date();
 
       if (dateFilter === "Today") {
         const isToday = txDate.getDate() === today.getDate() &&
@@ -196,6 +200,7 @@ export default function PaymentHistoryPage() {
 
     return true;
   });
+
 
   // Sort chronologically (newest first)
   const sortedTransactions = [...filteredTransactions].sort((a, b) => {
@@ -307,10 +312,10 @@ export default function PaymentHistoryPage() {
               </div>
 
               {/* Filters Actions Bar */}
-              <div className="flex items-center justify-center md:justify-end gap-3 w-full md:w-auto">
+              <div className="flex flex-col sm:flex-row items-center justify-center md:justify-end gap-3 w-full md:w-auto">
 
-                {/* Desktop Embedded Layout Search Bar */}
-                <div className="hidden md:relative md:block w-64">
+                {/* Responsive Search Bar */}
+                <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <Input
                     type="text"
@@ -321,7 +326,8 @@ export default function PaymentHistoryPage() {
                   />
                 </div>
 
-                <div className="flex items-center gap-2 justify-center w-full md:w-auto">
+                <div className="flex items-center gap-2 justify-center w-full sm:w-auto">
+
                   {/* Date Filter */}
                   <div className="relative" ref={dateRef}>
                     <button

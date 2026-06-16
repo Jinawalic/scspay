@@ -5,14 +5,20 @@ import prisma from "@/src/lib/prisma";
 import {
   createStudentProfilePayload,
   getCurrentStudent,
+  hashPassword,
+  verifyPassword,
 } from "@/src/lib/student-auth";
 import { makeDepartmentCode, makeSlug } from "@/src/lib/academic";
 
 const updateProfileSchema = z.object({
-  faculty: z.string().min(2, "Select your faculty"),
-  department: z.string().min(2, "Select your department"),
+  faculty: z.string().optional(),
+  department: z.string().optional(),
   level: z.string().optional(),
   phone: z.string().optional(),
+  email: z.string().optional(),
+  avatar: z.string().optional(),
+  currentPassword: z.string().optional(),
+  newPassword: z.string().optional(),
 });
 
 export async function GET() {
@@ -54,45 +60,88 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const { faculty, department, level, phone } = result.data;
-    const facultySlug = makeSlug(faculty);
-    const departmentSlug = makeSlug(`${facultySlug}-${department}`);
+    const {
+      faculty,
+      department,
+      level,
+      phone,
+      email,
+      avatar,
+      currentPassword,
+      newPassword,
+    } = result.data;
 
-    const savedFaculty = await prisma.faculty.upsert({
-      where: { slug: facultySlug },
-      update: { name: faculty },
-      create: {
-        name: faculty,
-        slug: facultySlug,
-      },
-    });
+    let newPasswordHash: string | undefined;
 
-    const savedDepartment = await prisma.department.upsert({
-      where: {
-        facultyId_name: {
+    // Password verification and change logic
+    if (currentPassword && newPassword) {
+      if (!student.passwordHash) {
+        return NextResponse.json(
+          { error: "Password not configured for this account" },
+          { status: 400 }
+        );
+      }
+
+      const isPasswordValid = verifyPassword(currentPassword, student.passwordHash);
+      if (!isPasswordValid) {
+        return NextResponse.json(
+          { error: "Incorrect current password" },
+          { status: 400 }
+        );
+      }
+
+      newPasswordHash = hashPassword(newPassword);
+    }
+
+    let facultyId: string | undefined;
+    let departmentId: string | undefined;
+
+    if (faculty && department) {
+      const facultySlug = makeSlug(faculty);
+      const departmentSlug = makeSlug(`${facultySlug}-${department}`);
+
+      const savedFaculty = await prisma.faculty.upsert({
+        where: { slug: facultySlug },
+        update: { name: faculty },
+        create: {
+          name: faculty,
+          slug: facultySlug,
+        },
+      });
+
+      const savedDepartment = await prisma.department.upsert({
+        where: {
+          facultyId_name: {
+            facultyId: savedFaculty.id,
+            name: department,
+          },
+        },
+        update: {
+          slug: departmentSlug,
+          code: makeDepartmentCode(facultySlug, department),
+        },
+        create: {
           facultyId: savedFaculty.id,
           name: department,
+          slug: departmentSlug,
+          code: makeDepartmentCode(facultySlug, department),
         },
-      },
-      update: {
-        slug: departmentSlug,
-        code: makeDepartmentCode(facultySlug, department),
-      },
-      create: {
-        facultyId: savedFaculty.id,
-        name: department,
-        slug: departmentSlug,
-        code: makeDepartmentCode(facultySlug, department),
-      },
-    });
+      });
+
+      facultyId = savedFaculty.id;
+      departmentId = savedDepartment.id;
+    }
 
     const updatedStudent = await prisma.user.update({
       where: { id: student.id },
       data: {
-        facultyId: savedFaculty.id,
-        departmentId: savedDepartment.id,
+        ...(facultyId ? { facultyId } : {}),
+        ...(departmentId ? { departmentId } : {}),
         ...(level ? { level } : {}),
-        ...(phone ? { phone } : {}),
+        ...(phone !== undefined ? { phone } : {}),
+        ...(email !== undefined ? { email } : {}),
+        ...(avatar !== undefined ? { avatar } : {}),
+        ...(newPasswordHash ? { passwordHash: newPasswordHash } : {}),
         completed: true,
       },
       include: {
@@ -112,3 +161,4 @@ export async function PATCH(request: NextRequest) {
     );
   }
 }
+

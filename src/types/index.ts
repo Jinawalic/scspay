@@ -41,4 +41,5 @@ export type StudentSessionProfile = {
   level: string | null;
   phone: string | null;
   completed: boolean;
+  avatar: string | null;
 };

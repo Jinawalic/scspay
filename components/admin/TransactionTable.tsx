@@ -20,9 +20,10 @@ export interface TransactionItem {
 interface TransactionTableProps {
   transactions: TransactionItem[];
   onDelete: (id: string) => void;
+  onView?: (id: string) => void;
 }
 
-export function TransactionTable({ transactions, onDelete }: TransactionTableProps) {
+export function TransactionTable({ transactions, onDelete, onView }: TransactionTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -111,7 +112,6 @@ export function TransactionTable({ transactions, onDelete }: TransactionTablePro
                 <th className="py-3.5 px-4">Date</th>
                 <th className="py-3.5 px-4">Amount</th>
                 <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-4 text-center w-24">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100/70 text-[14px] font-semibold text-slate-700">
@@ -149,25 +149,6 @@ export function TransactionTable({ transactions, onDelete }: TransactionTablePro
                         />
                         {tx.status}
                       </span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-3 justify-center">
-                        {/* Utilized the reusable functional IconButton components smoothly */}
-                        <IconButton
-                          icon={Eye}
-                          variant="default"
-                          title="View Details"
-                        />
-                        <IconButton
-                          icon={Trash}
-                          variant="rose"
-                          title="Delete Transaction Record"
-                          onClick={(e) => {
-                            e.stopPropagation(); // Stops DOM layout bubbling vectors cleanly
-                            triggerDeleteFlow(tx);
-                          }}
-                        />
-                      </div>
                     </td>
                   </tr>
                 ))

@@ -22,6 +22,7 @@ export type StudentProfilePayload = {
   level: string | null;
   phone: string | null;
   completed: boolean;
+  avatar: string | null;
 };
 
 export type StudentWithRelations = Prisma.UserGetPayload<{
@@ -63,6 +64,7 @@ export function createStudentProfilePayload(student: StudentWithRelations): Stud
     level: student.level,
     phone: student.phone,
     completed: student.completed,
+    avatar: student.avatar,
   };
 }
 

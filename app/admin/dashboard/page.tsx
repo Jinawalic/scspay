@@ -81,15 +81,31 @@ export default function AdminDashboardPage() {
     setIsPopoverOpen(!isPopoverOpen);
   };
 
-  const handleCommitSessionUpdate = (e: React.FormEvent) => {
+  const handleCommitSessionUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     const formattedSession = sessionInputValue.trim();
-    
+
     if (!formattedSession) return;
 
-    setCurrentSession(formattedSession);
-    setIsPopoverOpen(false);
-    triggerToast(`Academic dashboard view switched to session tracking profile: ${formattedSession}`, "success");
+    try {
+      const res = await fetch("/api/admin/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session: formattedSession }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error ?? "Unable to save session");
+      }
+
+      setCurrentSession(formattedSession);
+      setIsPopoverOpen(false);
+      triggerToast(`Academic dashboard view switched to session tracking profile: ${formattedSession}`, "success");
+    } catch (err) {
+      triggerToast(err instanceof Error ? err.message : "Unable to save session", "error");
+    }
   };
 
   // Performance Metric Tracker Card Dataset Slices
@@ -129,9 +145,27 @@ export default function AdminDashboardPage() {
     );
   });
 
-  const handleDeleteTransaction = (id: string) => {
-    setTransactions((prev) => prev.filter((tx) => tx.id !== id));
-    triggerToast(`Transaction ${id} has been dropped successfully.`, "success");
+  const handleDeleteTransaction = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/transactions/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error ?? "Unable to delete transaction");
+      }
+
+      setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+      triggerToast(`Transaction ${id} has been dropped successfully.`, "success");
+    } catch (err) {
+      triggerToast(err instanceof Error ? err.message : "Unable to delete transaction", "error");
+    }
+  };
+
+  const handleViewTransaction = (id: string) => {
+    window.location.href = `/receipt/${id}`;
   };
 
   return (
@@ -221,9 +255,10 @@ export default function AdminDashboardPage() {
                 {loadError}
               </div>
             ) : (
-              <TransactionTable 
-                transactions={filteredTransactions} 
+              <TransactionTable
+                transactions={filteredTransactions}
                 onDelete={handleDeleteTransaction}
+                onView={handleViewTransaction}
               />
             )}
           </div>

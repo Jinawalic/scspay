@@ -16,12 +16,21 @@ export default async function DashboardPage() {
     redirect("/");
   }
 
-  const pendingCount = await prisma.paymentTransaction.count({
+  // Query successful payment transactions of this user for notifications and status
+  const successfulTransactions = await prisma.paymentTransaction.findMany({
     where: {
       userId: student.id,
-      status: "Pending",
+      status: "Successful",
+    },
+    orderBy: {
+      paidAt: "desc",
+    },
+    include: {
+      feeItem: true,
     },
   });
+
+  const hasPaid = successfulTransactions.length > 0;
 
   return (
     <main className="min-h-screen bg-[#F4F6F8]">
@@ -29,8 +38,20 @@ export default async function DashboardPage() {
       <div className="lg:ml-60">
         <div className="px-4 py-8 sm:px-6 lg:px-10">
           <div className="mx-auto max-w-5xl space-y-2 pb-4 lg:pb-2">
-            <DashboardHeader studentName={student.fullName} />
-            <PaymentStatus hasPending={pendingCount > 0} />
+            <DashboardHeader
+              studentName={student.fullName}
+              studentId={student.id}
+              studentAvatar={student.avatar}
+              createdAt={student.createdAt.toISOString()}
+              successfulPayments={successfulTransactions.map((tx) => ({
+                id: tx.id,
+                amount: tx.amount,
+                feeName: tx.feeItem?.name ?? tx.type,
+                date: tx.paidAt.toISOString(),
+                receipt: tx.receipt,
+              }))}
+            />
+            <PaymentStatus hasPaid={hasPaid} />
             <QuickActions />
             <RecentTransactions />
           </div>
@@ -40,3 +61,4 @@ export default async function DashboardPage() {
     </main>
   );
 }
+

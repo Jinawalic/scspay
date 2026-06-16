@@ -143,12 +143,28 @@ export default function CreateDepartmentPage() {
   };
 
   // Dedicated Pipeline Delete Callback Function Engine
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!deptToDelete) return;
-    setDepartmentRecords(prev => prev.filter(item => item.id !== deptToDelete.id));
-    setIsDeleteOpen(false);
-    triggerToast(`Department profile record entry for "${deptToDelete.title}" was permanently removed.`);
-    setDeptToDelete(null);
+
+    try {
+      const response = await fetch(`/api/admin/departments/${deptToDelete.id}`, {
+        method: "DELETE",
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload?.error || "Unable to delete department");
+      }
+
+      setDepartmentRecords(prev => prev.filter(item => item.id !== deptToDelete.id));
+      setIsDeleteOpen(false);
+      triggerToast(`Department profile record entry for "${deptToDelete.title}" was permanently removed.`);
+      setDeptToDelete(null);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to delete department";
+      triggerToast(message);
+    }
   };
 
   return (

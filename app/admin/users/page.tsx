@@ -108,15 +108,30 @@ export default function UserManagementPage() {
     setIsDeleteModalOpen(true);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!selectedUserForDelete) return;
-    setUsers((prev) => prev.filter((u) => u.id !== selectedUserForDelete.id));
-    setIsDeleteModalOpen(false);
-    setSelectedUserForDelete(null);
-    triggerToast("User record has been permanently deleted.", "success");
 
-    if (displayedUsers.length === 1 && currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
+    try {
+      const res = await fetch(`/api/admin/users/${selectedUserForDelete.id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error ?? "Unable to delete user");
+      }
+
+      setUsers((prev) => prev.filter((u) => u.id !== selectedUserForDelete.id));
+      setIsDeleteModalOpen(false);
+      setSelectedUserForDelete(null);
+      triggerToast("User record has been permanently deleted.", "success");
+
+      if (displayedUsers.length === 1 && currentPage > 1) {
+        setCurrentPage((prev) => prev - 1);
+      }
+    } catch (err) {
+      triggerToast(err instanceof Error ? err.message : "Unable to delete user", "error");
     }
   };
 

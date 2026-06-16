@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Download, ChevronDown, X, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
+import { Download, ChevronDown, X, ChevronLeft, ChevronRight, SlidersHorizontal, Eye, Trash } from "lucide-react";
 import { AdminLayoutContainer } from "@/components/admin/AdminLayoutContainer";
 import { ToastNotification, type ToastType } from "@/components/admin/ToastNotification";
 import { Button } from "@/components/admin/Button";
@@ -101,6 +101,31 @@ export default function TransactionPage() {
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginated = filtered.slice(startIndex, startIndex + itemsPerPage);
+
+  // Delete transaction logic
+  const handleDeleteTransaction = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/transactions/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error ?? "Unable to delete transaction");
+      }
+
+      setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+      triggerToast("Transaction deleted successfully.", "success");
+    } catch (err) {
+      triggerToast(err instanceof Error ? err.message : "Unable to delete transaction", "error");
+    }
+  };
+
+  // View receipt logic
+  const handleViewReceipt = (receipt: string) => {
+    window.location.href = `/receipt/${receipt}`;
+  };
 
   // CSV download logic
   const handleDownloadCSV = () => {
@@ -282,7 +307,7 @@ export default function TransactionPage() {
                 <tbody className="divide-y divide-slate-100/70 text-[13px] font-medium text-slate-700">
                   {isLoading ? (
                     <tr>
-                      <td colSpan={9} className="text-center py-10 text-slate-400 font-semibold text-sm">
+                      <td colSpan={10} className="text-center py-10 text-slate-400 font-semibold text-sm">
                         Loading payment records...
                       </td>
                     </tr>
@@ -306,7 +331,7 @@ export default function TransactionPage() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={9} className="text-center py-10 text-slate-400 font-semibold text-sm">
+                      <td colSpan={10} className="text-center py-10 text-slate-400 font-semibold text-sm">
                         No successful payment records found.
                       </td>
                     </tr>
