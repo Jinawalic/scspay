@@ -1,14 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { User, CreditCard, AlarmClock, CalendarRange } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { User, CreditCard } from "lucide-react";
 import { AdminLayoutContainer } from "@/components/admin/AdminLayoutContainer";
 import { MetricCard } from "@/components/admin/MetricCard";
 import { TransactionTable, type TransactionItem } from "@/components/admin/TransactionTable";
 import { ToastNotification, ToastType } from "@/components/admin/ToastNotification";
-
-// Reusable atomic workflow component layers
-import { Button } from "@/components/admin/Button";
 
 export default function AdminDashboardPage() {
   const [transactions, setTransactions] = useState<TransactionItem[]>([]);
@@ -17,13 +14,6 @@ export default function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  
-  // Dashboard Session Managing States
-  const [currentSession, setCurrentSession] = useState("2025/2026");
-  const [sessionInputValue, setSessionInputValue] = useState("2025/2026");
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  
-  const popoverRef = useRef<HTMLDivElement>(null);
   
   // Reusable System Toast state structure
   const [toast, setToast] = useState<{ isOpen: boolean; message: string; type: ToastType }>({
@@ -49,10 +39,6 @@ export default function AdminDashboardPage() {
           setTransactions(data.recentTransactions ?? []);
           setStudentsCount(data.studentsCount ?? 0);
           setPaymentsCount(data.paymentsCount ?? 0);
-          if (data.currentSession) {
-            setCurrentSession(data.currentSession);
-            setSessionInputValue(data.currentSession);
-          }
         }
       } catch (err) {
         if (isMounted) setLoadError(err instanceof Error ? err.message : "Unable to load dashboard data");
@@ -65,48 +51,6 @@ export default function AdminDashboardPage() {
     return () => { isMounted = false; };
   }, []);
 
-  // Close the mini card context wrapper automatically if clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
-        setIsPopoverOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleOpenPopover = () => {
-    setSessionInputValue(currentSession); // Seed current val when opened
-    setIsPopoverOpen(!isPopoverOpen);
-  };
-
-  const handleCommitSessionUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const formattedSession = sessionInputValue.trim();
-
-    if (!formattedSession) return;
-
-    try {
-      const res = await fetch("/api/admin/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ session: formattedSession }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error ?? "Unable to save session");
-      }
-
-      setCurrentSession(formattedSession);
-      setIsPopoverOpen(false);
-      triggerToast(`Academic dashboard view switched to session tracking profile: ${formattedSession}`, "success");
-    } catch (err) {
-      triggerToast(err instanceof Error ? err.message : "Unable to save session", "error");
-    }
-  };
 
   // Performance Metric Tracker Card Dataset Slices
   const metricsData = [
@@ -124,14 +68,6 @@ export default function AdminDashboardPage() {
       icon: CreditCard, 
       subtitle: "Successful transactions processed", 
       subtitleColor: "text-emerald-500",
-      isNegative: false 
-    },
-    { 
-      title: "Current Session", 
-      value: currentSession, 
-      icon: AlarmClock, 
-      subtitle: "Active academic calendar year", 
-      subtitleColor: "text-amber-500",
       isNegative: false 
     },
   ];
@@ -175,57 +111,6 @@ export default function AdminDashboardPage() {
         {/* Top Header Row Block */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 select-none">
           <h1 className="text-[15px] font-bold text-slate-900">Dashboard Overview</h1>
-          
-          {/* Relative anchor wrapper container */}
-          <div className="relative" ref={popoverRef}>
-            <Button 
-              variant="default" 
-              type="button"
-              onClick={handleOpenPopover}
-              className="text-white"
-            >
-              Set Session
-            </Button>
-
-            {/* Small dynamic input card floating underneath button anchor */}
-            {isPopoverOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 shadow-xl rounded-xl p-4 z-40 animate-in fade-in slide-in-from-top-2 duration-150">
-                <form onSubmit={handleCommitSessionUpdate} className="space-y-3">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                      <CalendarRange className="h-3 w-3" />
-                      Academic Session
-                    </label>
-                    <input
-                      type="text"
-                      autoFocus
-                      required
-                      placeholder="e.g., 2026/2027"
-                      value={sessionInputValue}
-                      onChange={(e) => setSessionInputValue(e.target.value)}
-                      className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-300 focus:outline-none focus:border-slate-300 focus:bg-white transition"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
-                    <button
-                      type="button"
-                      onClick={() => setIsPopoverOpen(false)}
-                      className="px-2.5 py-1 text-[11px] font-bold text-slate-500 hover:bg-slate-50 rounded-md transition"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-3 py-1 text-[11px] font-bold text-white bg-emerald-800 hover:bg-emerald-900 rounded-md shadow-sm transition"
-                    >
-                      Save
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Performance Metric Tracker Dynamic Cards Section */}

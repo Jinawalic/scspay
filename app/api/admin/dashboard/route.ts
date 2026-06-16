@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/src/lib/prisma";
-import { formatPaymentDate, getCurrentAcademicSession } from "@/src/lib/payment-flow";
+import { formatPaymentDate } from "@/src/lib/payment-flow";
 
 export async function GET() {
   try {
@@ -33,14 +33,10 @@ export async function GET() {
       status: tx.status === "Successful" ? "Completed" : "Pending",
     }));
 
-    // 4. Get current academic session
-    const currentSession = getCurrentAcademicSession();
-
     return NextResponse.json({
       studentsCount,
       paymentsCount,
       recentTransactions,
-      currentSession,
     });
   } catch (error) {
     console.error("[admin/dashboard:get]", error);
