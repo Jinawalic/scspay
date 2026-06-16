@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SCS Pay
+
+A student payment management system built with Next.js, Prisma, and PostgreSQL.
 
 ## Getting Started
 
@@ -16,21 +18,45 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` to `.env` and configure the following variables:
 
-## Learn More
+- `DATABASE_URL` - PostgreSQL connection string
+- `DIRECT_URL` - Direct PostgreSQL connection string for Prisma
+- `PAYSTACK_SECRET_KEY` - Paystack API secret key for payment processing
+- `NEXT_PUBLIC_API_URL` - (Optional) Public API URL for callbacks
 
-To learn more about Next.js, take a look at the following resources:
+## Database Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Generate Prisma client
+npm run prisma:generate
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Push schema to database
+npm run prisma:push
+```
+
+## Build
+
+```bash
+npm run build
+```
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Push your code to GitHub
+2. Import project in Vercel
+3. Add environment variables in Vercel dashboard:
+   - `DATABASE_URL`
+   - `DIRECT_URL`
+   - `PAYSTACK_SECRET_KEY`
+4. Deploy
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The project includes a `postinstall` script that automatically generates the Prisma client during deployment.
+
+## Learn More
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Prisma Documentation](https://www.prisma.io/docs)
+- [Paystack Documentation](https://paystack.com/docs)

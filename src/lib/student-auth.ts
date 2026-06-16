@@ -101,9 +101,24 @@ export async function getCurrentStudent() {
       id: sessionId,
       kind: "STUDENT",
     },
-    include: {
+    select: {
+      id: true,
+      kind: true,
+      role: true,
+      fullName: true,
+      email: true,
+      matricNumber: true,
+      passwordHash: true,
+      phone: true,
+      level: true,
+      avatar: true,
+      completed: true,
+      facultyId: true,
+      departmentId: true,
       faculty: true,
       department: true,
+      createdAt: true,
+      updatedAt: true,
     },
   });
 }
